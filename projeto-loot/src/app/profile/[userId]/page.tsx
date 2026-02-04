@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { AvatarImage } from "@/components/ui/AvatarImage";
 import { CardImage } from "@/components/ui/CardImage";
 import { ProfileEditName } from "@/features/profile/components/ProfileEditName";
+import { normalizeCatalogImageUrl } from "@/lib/catalog-image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -170,7 +171,7 @@ export default async function ProfilePage({
                 <div className="mt-2 flex items-center gap-2">
                   <span className="text-sm text-zinc-500 dark:text-zinc-400">Carta mais rara:</span>
                   <CardImage
-                    src={rarestCard.image_url}
+                    src={normalizeCatalogImageUrl(rarestCard.image_url)}
                     alt=""
                     width={40}
                     height={40}

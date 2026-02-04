@@ -6,6 +6,7 @@ import { ExperienceBar } from "@/components/ui/ExperienceBar";
 import { MatchBoardHybrid } from "@/features/duels/components/MatchBoardHybrid";
 import { MatchSummary } from "@/features/duels/components/MatchSummary";
 import type { MatchEventRow } from "@/features/duels/components/MatchActionLog";
+import { normalizeCatalogImageUrl } from "@/lib/catalog-image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -82,7 +83,7 @@ export default async function MatchPage({
       final_atk: uc?.final_atk ?? 0,
       mana_cost: uc?.mana_cost ?? 0,
       keyword: uc?.keyword ?? "",
-      image_url: uc?.image_url ?? null,
+      image_url: normalizeCatalogImageUrl(uc?.image_url) ?? null,
     };
   });
 
@@ -176,7 +177,7 @@ export default async function MatchPage({
                 final_atk: c.final_atk,
                 mana_cost: c.mana_cost,
                 keyword: c.keyword,
-                image_url: c.image_url ?? undefined,
+                image_url: normalizeCatalogImageUrl(c.image_url) ?? undefined,
               }))}
               player1Label={isPlayer1 ? "Você" : "Oponente"}
               player2Label={isPlayer2 ? "Você" : "Oponente"}

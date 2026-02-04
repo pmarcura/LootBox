@@ -4,13 +4,17 @@ import Link from "next/link";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-/** URLs das imagens da home (env ou objeto vazio). Proporção 2816:1536, object-contain. */
+/** URLs das imagens da home: env ou fallback para arquivos em public/images. Proporção 2816:1536, object-contain. */
 const HOME_IMAGES = {
   hero: process.env.NEXT_PUBLIC_HOME_HERO_IMAGE ?? "",
-  featureResgatar: process.env.NEXT_PUBLIC_HOME_FEATURE_RESGATAR_IMAGE ?? "",
-  featureFusao: process.env.NEXT_PUBLIC_HOME_FEATURE_FUSAO_IMAGE ?? "",
-  featureDuelos: process.env.NEXT_PUBLIC_HOME_FEATURE_DUELOS_IMAGE ?? "",
-  featureInventario: process.env.NEXT_PUBLIC_HOME_FEATURE_INVENTARIO_IMAGE ?? "",
+  featureResgatar:
+    process.env.NEXT_PUBLIC_HOME_FEATURE_RESGATAR_IMAGE ?? "/images/Resgatar.jpg",
+  featureFusao:
+    process.env.NEXT_PUBLIC_HOME_FEATURE_FUSAO_IMAGE ?? "/images/Fusão.jpg",
+  featureDuelos:
+    process.env.NEXT_PUBLIC_HOME_FEATURE_DUELOS_IMAGE ?? "/images/Duelo.jpg",
+  featureInventario:
+    process.env.NEXT_PUBLIC_HOME_FEATURE_INVENTARIO_IMAGE ?? "/images/Inventario.jpg",
 };
 
 export const metadata: Metadata = {

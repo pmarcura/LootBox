@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { FusionLab } from "@/features/fusion/components/FusionLab";
+import { normalizeCatalogImageUrl } from "@/lib/catalog-image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -56,7 +57,7 @@ export default async function FusionPage() {
       baseHp: c?.base_hp ?? 0,
       baseAtk: c?.base_atk ?? 0,
       baseMana: c?.base_mana ?? 0,
-      imageUrl: c?.image_url ?? null,
+      imageUrl: normalizeCatalogImageUrl(c?.image_url) ?? null,
     };
   });
 
@@ -68,7 +69,7 @@ export default async function FusionPage() {
       slug: s?.slug ?? "",
       rarity: s?.rarity ?? "common",
       family: s?.family ?? "",
-      imageUrl: s?.image_url ?? null,
+      imageUrl: normalizeCatalogImageUrl(s?.image_url) ?? null,
     };
   });
 

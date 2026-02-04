@@ -18,6 +18,7 @@ import type {
   StrainRow,
   UserCardItem,
 } from "@/features/inventory/types";
+import { normalizeCatalogImageUrl } from "@/lib/catalog-image";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function buildGroupsBySeries(
@@ -68,7 +69,7 @@ function buildGroupsBySeries(
       name: entry.collectible.name,
       slug: entry.collectible.slug,
       rarity: entry.collectible.rarity as InventoryItemGrouped["rarity"],
-      imageUrl: entry.collectible.image_url ?? null,
+      imageUrl: normalizeCatalogImageUrl(entry.collectible.image_url) ?? null,
       series: entry.collectible.series ?? null,
       count: entry.ids.length,
       inventoryIds: entry.ids,
@@ -181,7 +182,7 @@ export default async function InventoryPage() {
     vesselName: vesselNamesByCollectibleId[c.vessel_collectible_id]?.name,
     vesselSlug: vesselNamesByCollectibleId[c.vessel_collectible_id]?.slug,
     createdAt: c.created_at,
-    imageUrl: c.image_url ?? null,
+    imageUrl: normalizeCatalogImageUrl(c.image_url) ?? null,
   }));
 
   const totalVessels = rows.length;
@@ -300,7 +301,7 @@ function buildStrainGroups(
       slug: entry.strain.slug,
       rarity: entry.strain.rarity as StrainItemGrouped["rarity"],
       family: entry.strain.family as StrainItemGrouped["family"],
-      imageUrl: entry.strain.image_url ?? null,
+      imageUrl: normalizeCatalogImageUrl(entry.strain.image_url) ?? null,
       count: entry.ids.length,
       userStrainIds: entry.ids,
       dissolveableIds: entry.dissolveableIds,
