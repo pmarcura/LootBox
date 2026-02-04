@@ -7,6 +7,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
  * Database connection for Drizzle ORM.
  * Uses DATABASE_URL (Supabase Postgres connection string from Settings > Database).
  * Prefer pooler/transaction mode for serverless; set prepare: false.
+ * Lazy init so build (e.g. Vercel) can run without DATABASE_URL; only fails at runtime when db is used.
  */
 function getConnectionString(): string {
   const url = process.env.DATABASE_URL;
@@ -28,9 +29,20 @@ function getClient() {
   return _client;
 }
 
-export const db = drizzle(getClient(), { schema });
+let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
-export type Db = typeof db;
+function getDb() {
+  if (!_db) _db = drizzle(getClient(), { schema });
+  return _db;
+}
+
+export type Db = ReturnType<typeof getDb>;
+
+export const db: Db = new Proxy({} as Db, {
+  get(_, prop) {
+    return (getDb() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
 
 /**
  * Returns { db, userId } after validating the session.
