@@ -21,7 +21,8 @@
     "import:codes": "tsx src/scripts/import-redemption-codes.ts",
     "bootstrap:admin": "tsx src/scripts/bootstrap-admin.ts",
     "playground:generate-decks": "tsx src/scripts/playground-generate-decks.ts",
-    "setup": "npm run seed:catalog && npm run import:codes -- --file drop_season_01_print.csv --batch season01 && npm run bootstrap:admin"
+    "setup": "npm run seed:catalog && npm run import:codes -- --file drop_season_01_print.csv --batch season01 && npm run bootstrap:admin",
+    "predeploy": "npm run build"
   },
   "dependencies": {
     "@pixi/react": "^8.0.5",

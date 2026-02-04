@@ -10,6 +10,7 @@
 
 - `npm run check` (lint + typecheck).
 - `npm run test:run` (testes unitários).
+- **Antes de push para `main` (deploy Vercel):** rode `npm run build` (ou `npm run predeploy`) dentro de `projeto-loot` para reproduzir o mesmo ambiente da Vercel e evitar falhas de build por tipos.
 
 ## Documentação
 
