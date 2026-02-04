@@ -80,7 +80,7 @@ function SlotCard({
   const cardContent = (
     <>
       <div className="relative h-12 w-full shrink-0 bg-zinc-900">
-        <CardImage src={card.image_url} alt="" fill className="object-cover object-center">
+        <CardImage src={card.image_url} alt="" fill objectFit="contain">
           <div className="h-12 w-full shrink-0 bg-zinc-800 flex items-center justify-center gap-2 text-zinc-500 text-xs">
             <span className="inline-flex items-center gap-0.5">
               <HeartIcon size={12} className="text-red-400/90" />
@@ -217,7 +217,7 @@ function HandCard({
         whileTap={playable ? { scale: 0.98 } : undefined}
       >
         <div className="relative h-14 w-full shrink-0 bg-zinc-900 ring-1 ring-zinc-600/50">
-          <CardImage src={card.image_url} alt="" fill className="object-cover object-center">
+          <CardImage src={card.image_url} alt="" fill objectFit="contain">
             <div className="h-full w-full flex items-center justify-center gap-1.5 text-zinc-500 text-xs">
               <span className="inline-flex items-center gap-0.5">
                 <HeartIcon size={10} className="text-red-400/80" />

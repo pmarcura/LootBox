@@ -174,7 +174,8 @@ export default async function ProfilePage({
                     alt=""
                     width={40}
                     height={40}
-                    className="h-10 w-10 rounded object-cover ring-1 ring-zinc-300 dark:ring-zinc-600"
+                    objectFit="contain"
+                    className="h-10 w-10 rounded ring-1 ring-zinc-300 dark:ring-zinc-600"
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded bg-zinc-300 text-xs font-medium uppercase text-zinc-600 dark:bg-zinc-600 dark:text-zinc-200">
                       {rarestCard.rarity}

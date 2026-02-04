@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+/** URLs das imagens da home (env ou objeto vazio). Proporção 2816:1536, object-contain. */
+const HOME_IMAGES = {
+  hero: process.env.NEXT_PUBLIC_HOME_HERO_IMAGE ?? "",
+  featureResgatar: process.env.NEXT_PUBLIC_HOME_FEATURE_RESGATAR_IMAGE ?? "",
+  featureFusao: process.env.NEXT_PUBLIC_HOME_FEATURE_FUSAO_IMAGE ?? "",
+  featureDuelos: process.env.NEXT_PUBLIC_HOME_FEATURE_DUELOS_IMAGE ?? "",
+  featureInventario: process.env.NEXT_PUBLIC_HOME_FEATURE_INVENTARIO_IMAGE ?? "",
+};
 
 export const metadata: Metadata = {
   title: "Gênesis | Colecione, Fusione, Duelo",
@@ -12,6 +22,7 @@ export const metadata: Metadata = {
 const FEATURES = [
   {
     title: "Resgatar",
+    imageKey: "featureResgatar" as const,
     body: "Use códigos físicos ou digitais para resgatar criaturas e adicionar à sua coleção. Cada código vale uma carta.",
     href: "/gacha",
     icon: (
@@ -23,6 +34,7 @@ const FEATURES = [
   },
   {
     title: "Fusão",
+    imageKey: "featureFusao" as const,
     body: "Combine duas criaturas no laboratório e crie uma nova carta com atributos herdados. Experimente combinações e raridades.",
     href: "/fusion",
     icon: (
@@ -34,6 +46,7 @@ const FEATURES = [
   },
   {
     title: "Duelos",
+    imageKey: "featureDuelos" as const,
     body: "Jogue contra a IA, desafie um amigo ou enfrente ondas no modo coop. Monte seu deck e dispute partidas estratégicas.",
     href: "/duels",
     icon: (
@@ -45,6 +58,7 @@ const FEATURES = [
   },
   {
     title: "Inventário",
+    imageKey: "featureInventario" as const,
     body: "Suas criaturas, cartas e essência em um só lugar. Organize, dissolva e prepare decks para os duelos.",
     href: "/inventory",
     icon: (
@@ -76,7 +90,8 @@ export default async function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-zinc-200 bg-gradient-to-b from-white to-zinc-50/80 px-6 py-16 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950/80 md:py-24">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.08),transparent)]" />
-        <div className="relative mx-auto max-w-4xl text-center">
+        <div className="relative mx-auto grid max-w-5xl gap-8 md:grid-cols-2 md:items-center">
+          <div className="order-2 text-center md:order-1 md:text-left">
           <p className="text-xs font-medium uppercase tracking-[0.35em] text-violet-600 dark:text-violet-400">
             Gênesis
           </p>
@@ -125,6 +140,19 @@ export default async function Home() {
               </>
             )}
           </div>
+          </div>
+          {HOME_IMAGES.hero && (
+            <div className="relative aspect-[2816/1536] w-full max-w-2xl overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800 md:order-2">
+              <Image
+                src={HOME_IMAGES.hero}
+                alt=""
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized={HOME_IMAGES.hero.startsWith("/")}
+              />
+            </div>
+          )}
         </div>
       </section>
 
@@ -138,16 +166,33 @@ export default async function Home() {
             Do resgate à batalha: um ecossistema phygital pensado para colecionadores e duelistas.
           </p>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map((feature) => (
+            {FEATURES.map((feature) => {
+              const imageUrl = HOME_IMAGES[feature.imageKey];
+              return (
               <Link
                 key={feature.title}
                 href={feature.href}
-                className={`group flex flex-col rounded-2xl border bg-white p-6 shadow-sm transition hover:shadow-md dark:bg-zinc-900 dark:hover:bg-zinc-800/80 ${accentBorder[feature.accent] ?? accentBorder.violet}`}
+                className={`group flex flex-col rounded-2xl border bg-white shadow-sm transition hover:shadow-md dark:bg-zinc-900 dark:hover:bg-zinc-800/80 ${accentBorder[feature.accent] ?? accentBorder.violet}`}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:bg-violet-400/10 dark:text-violet-400">
-                  {feature.icon}
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                {imageUrl ? (
+                  <div className="relative aspect-[2816/1536] w-full shrink-0 overflow-hidden rounded-t-2xl bg-zinc-100 dark:bg-zinc-800">
+                    <Image
+                      src={imageUrl}
+                      alt=""
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 25vw"
+                      unoptimized={imageUrl.startsWith("/")}
+                    />
+                  </div>
+                ) : null}
+                <div className="flex flex-1 flex-col p-6">
+                {!imageUrl && (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:bg-violet-400/10 dark:text-violet-400">
+                    {feature.icon}
+                  </div>
+                )}
+                <h3 className={`text-lg font-semibold text-zinc-900 dark:text-zinc-50 ${!imageUrl ? "mt-4" : ""}`}>
                   {feature.title}
                 </h3>
                 <p className="mt-2 flex-1 text-sm text-zinc-600 dark:text-zinc-400">
@@ -159,8 +204,10 @@ export default async function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </span>
+                </div>
               </Link>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>

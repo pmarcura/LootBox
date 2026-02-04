@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useActionState, useState } from "react";
 
@@ -8,6 +9,11 @@ import { dissolveStrainsAction } from "../actions/dissolve-strains";
 import { getEssenceForRarity } from "../utils/essence";
 import { getStrainFamilyDisplay } from "@/lib/strain-family";
 import type { StrainItemGrouped } from "../types";
+import type { Rarity } from "@/features/gacha/types";
+
+function getPlaceholderByRarity(rarity: Rarity): string {
+  return `/images/creatures/${rarity}.svg`;
+}
 
 type StrainCardProps = {
   item: StrainItemGrouped;
@@ -41,10 +47,37 @@ export function StrainCard({ item }: StrainCardProps) {
   const countToDissolve = idsToDissolve.length;
   const essenceEarned = countToDissolve * getEssenceForRarity(item.rarity);
   const hasUsed = item.count > item.dissolveableIds.length;
+  const hasImage = Boolean(item.imageUrl);
 
   return (
     <>
       <article className="flex flex-col overflow-hidden rounded-2xl border-2 border-zinc-200 bg-white shadow-md dark:border-zinc-700 dark:bg-zinc-950">
+        <div className="relative aspect-[2816/1536] w-full shrink-0 overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+          {hasImage ? (
+            <Image
+              src={item.imageUrl!}
+              alt={item.name}
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 33vw"
+              unoptimized={item.imageUrl!.startsWith("/")}
+            />
+          ) : (
+            <Image
+              src={getPlaceholderByRarity(item.rarity as Rarity)}
+              alt={item.name}
+              fill
+              className="object-contain p-6"
+              sizes="(max-width: 768px) 100vw, 33vw"
+              unoptimized
+            />
+          )}
+          {item.count > 1 && (
+            <div className="absolute right-2 top-2 rounded-lg bg-black/70 px-2.5 py-1 text-sm font-bold text-white backdrop-blur-sm">
+              {item.count}×
+            </div>
+          )}
+        </div>
         <div className="flex flex-1 flex-col p-4">
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
             {item.name}

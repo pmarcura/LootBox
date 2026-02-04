@@ -61,21 +61,23 @@ export function FusionSlot({
         )}
         aria-label={isEmpty ? "Selecionar monstro (hospedeiro)" : `Monstro selecionado: ${v?.name}. Clique para trocar`}
       >
-        {hasImage && (
-          <>
-            <Image
-              src={v!.imageUrl!}
-              alt=""
-              fill
-              className="object-cover object-center"
-              sizes="(max-width: 768px) 50vw, 300px"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/20" />
-          </>
-        )}
-        {!hasImage && !isEmpty && (
-          <div className={cn("absolute inset-0", getRaritySlotBg(v!.rarity))} />
-        )}
+        <div className="relative w-full shrink-0 aspect-[2816/1536] overflow-hidden bg-zinc-900">
+          {hasImage && (
+            <>
+              <Image
+                src={v!.imageUrl!}
+                alt=""
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 50vw, 300px"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/20 pointer-events-none" />
+            </>
+          )}
+          {!hasImage && !isEmpty && (
+            <div className={cn("absolute inset-0", getRaritySlotBg(v!.rarity))} />
+          )}
+        </div>
         <div className="relative z-10 w-full p-3 text-center">
           {isEmpty ? (
             <>
@@ -136,21 +138,23 @@ export function FusionSlot({
       )}
       aria-label={isEmpty ? "Selecionar planta (strain)" : `Planta selecionada: ${s?.name}. Clique para trocar`}
     >
-      {hasImage && (
-        <>
-          <Image
-            src={s!.imageUrl!}
-            alt=""
-            fill
-            className="object-cover object-center rounded-full"
-            sizes="(max-width: 768px) 50vw, 300px"
-          />
-          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/95 via-black/40 to-black/20" />
-        </>
-      )}
-      {!hasImage && !isEmpty && (
-        <div className={cn("absolute inset-0 rounded-full", getRaritySlotBg(s!.rarity))} />
-      )}
+      <div className="relative w-full shrink-0 aspect-[2816/1536] overflow-hidden rounded-t-xl bg-zinc-900">
+        {hasImage && (
+          <>
+            <Image
+              src={s!.imageUrl!}
+              alt=""
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 50vw, 300px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/20 pointer-events-none" />
+          </>
+        )}
+        {!hasImage && !isEmpty && (
+          <div className={cn("absolute inset-0", getRaritySlotBg(s!.rarity))} />
+        )}
+      </div>
       <div className="relative z-10 w-full p-3 text-center">
         {isEmpty ? (
           <>

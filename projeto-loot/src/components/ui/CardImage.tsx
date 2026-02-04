@@ -10,6 +10,8 @@ type CardImageProps = {
   /** Preencher o container (parent com position: relative). */
   fill?: boolean;
   className?: string;
+  /** object-fit para arte de criatura/carta: "contain" = nada cortado; "cover" = preencher (pode recortar). */
+  objectFit?: "contain" | "cover";
   /** Conteúdo quando não há imagem (ex.: stats da carta) */
   children?: React.ReactNode;
 };
@@ -22,8 +24,12 @@ export function CardImage({
   height = 224,
   fill = false,
   className = "",
+  objectFit = "cover",
   children,
 }: CardImageProps) {
+  const fitClass = objectFit === "contain" ? "object-contain" : "object-cover object-center";
+  const combinedClassName = [className, fitClass].filter(Boolean).join(" ");
+
   if (!src) {
     return <div className={fill ? "h-full w-full " + className : className}>{children}</div>;
   }
@@ -33,7 +39,7 @@ export function CardImage({
         src={src}
         alt={alt}
         fill
-        className={className}
+        className={combinedClassName}
         sizes="(max-width: 640px) 88px, 160px"
         unoptimized={!isOptimizableUrl(src)}
       />
@@ -45,7 +51,7 @@ export function CardImage({
       alt={alt}
       width={width}
       height={height}
-      className={className}
+      className={combinedClassName}
       sizes="(max-width: 640px) 88px, 160px"
       unoptimized={!isOptimizableUrl(src)}
     />

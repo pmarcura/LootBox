@@ -79,14 +79,14 @@ export function InventoryCard({ item }: InventoryCardProps) {
       <article
         className={`group flex flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-md transition-shadow hover:shadow-lg dark:bg-zinc-950 ${borderStyle}`}
       >
-        {/* 1. Imagem em destaque (âncora visual) */}
-        <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+        {/* 1. Imagem em destaque (proporção 2816:1536, sem recorte) */}
+        <div className="relative aspect-[2816/1536] shrink-0 overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
           {hasImage ? (
             <Image
               src={item.imageUrl!}
               alt={item.name}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-contain transition-transform duration-300 group-hover:scale-[1.02]"
               sizes="(max-width: 768px) 100vw, 33vw"
               unoptimized={item.imageUrl!.startsWith("/")}
             />

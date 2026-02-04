@@ -83,7 +83,7 @@ function SlotCard({
   const cardContent = (
     <>
       <div className="relative h-12 w-full shrink-0 bg-zinc-900">
-        <CardImage src={card.image_url} alt="" fill className="object-cover object-center" />
+        <CardImage src={card.image_url} alt="" fill objectFit="contain" />
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2 px-2 py-1">
         <span
@@ -222,7 +222,7 @@ function HandCard({
         whileTap={playable ? { scale: 0.98 } : undefined}
       >
         <div className="relative h-14 w-full shrink-0 bg-zinc-900 ring-1 ring-zinc-600/50">
-          <CardImage src={card.image_url} alt="" fill className="object-cover object-center" />
+          <CardImage src={card.image_url} alt="" fill objectFit="contain" />
           <span
             className={`absolute right-1 top-1 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums ${
               playable ? "border border-amber-400/50 bg-amber-500/90 text-zinc-950" : "bg-zinc-600/90 text-zinc-200"

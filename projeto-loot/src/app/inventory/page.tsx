@@ -94,6 +94,7 @@ type CardRow = {
   created_at: string;
   vessel_inventory_id?: string | null;
   vessel_collectible_id: string;
+  image_url?: string | null;
 };
 
 export default async function InventoryPage() {
@@ -118,13 +119,13 @@ export default async function InventoryPage() {
       supabase
         .from("user_strains")
         .select(
-          "id, acquired_at, strain:strains_catalog(id, name, slug, rarity, family)",
+          "id, acquired_at, strain:strains_catalog(id, name, slug, rarity, family, image_url)",
         )
         .eq("user_id", user.id)
         .order("acquired_at", { ascending: false }),
       supabase
         .from("user_cards")
-        .select("id, token_id, final_hp, final_atk, mana_cost, keyword, created_at, vessel_collectible_id")
+        .select("id, token_id, final_hp, final_atk, mana_cost, keyword, created_at, vessel_collectible_id, image_url")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
       supabase
@@ -180,6 +181,7 @@ export default async function InventoryPage() {
     vesselName: vesselNamesByCollectibleId[c.vessel_collectible_id]?.name,
     vesselSlug: vesselNamesByCollectibleId[c.vessel_collectible_id]?.slug,
     createdAt: c.created_at,
+    imageUrl: c.image_url ?? null,
   }));
 
   const totalVessels = rows.length;
@@ -298,6 +300,7 @@ function buildStrainGroups(
       slug: entry.strain.slug,
       rarity: entry.strain.rarity as StrainItemGrouped["rarity"],
       family: entry.strain.family as StrainItemGrouped["family"],
+      imageUrl: entry.strain.image_url ?? null,
       count: entry.ids.length,
       userStrainIds: entry.ids,
       dissolveableIds: entry.dissolveableIds,

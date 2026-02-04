@@ -34,6 +34,7 @@ export type StrainItemGrouped = {
   slug: string;
   rarity: Rarity;
   family: StrainFamily;
+  imageUrl?: string | null;
   count: number;
   userStrainIds: string[];
   dissolveableIds: string[];
@@ -50,6 +51,7 @@ export type UserCardItem = {
   keyword: string;
   vesselName?: string;
   vesselSlug?: string;
+  imageUrl?: string | null;
   createdAt: string;
 };
 
@@ -75,6 +77,7 @@ export type StrainCatalogRow = {
   slug: string;
   rarity: string;
   family: string;
+  image_url?: string | null;
 };
 
 export type StrainRow = {

@@ -44,7 +44,8 @@ function CardLine({ label, card, value, suffix }: CardLineProps) {
           alt=""
           width={40}
           height={40}
-          className="h-10 w-10 shrink-0 rounded object-cover ring-1 ring-zinc-600"
+          objectFit="contain"
+          className="h-10 w-10 shrink-0 rounded ring-1 ring-zinc-600"
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-zinc-700 text-xs text-zinc-400">
             {card.final_hp}/{card.final_atk}
@@ -264,7 +265,8 @@ export function MatchSummary({ events, cards, player1Label = "Jogador 1", player
                   alt=""
                   width={36}
                   height={36}
-                  className="h-9 w-9 shrink-0 rounded object-cover ring-1 ring-zinc-600"
+                  objectFit="contain"
+                  className="h-9 w-9 shrink-0 rounded ring-1 ring-zinc-600"
                 >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-zinc-700 text-[10px] text-zinc-400">
                     {card.final_hp}/{card.final_atk}

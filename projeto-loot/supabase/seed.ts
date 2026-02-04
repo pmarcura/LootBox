@@ -32,6 +32,7 @@ const strainSchema = z.object({
   family: strainFamilyEnum,
   description: z.string().optional().nullable(),
   penalty: z.string().optional().nullable(),
+  image_url: z.string().optional().nullable(),
 });
 
 const seasonSchema = z.object({
@@ -103,13 +104,27 @@ async function main() {
     slug: item.slug,
     name: item.name,
     rarity: item.rarity,
-    image_url: null,
+    image_url: item.image_url ?? null,
     attributes: {
       family: item.family,
       description: item.description ?? null,
       penalty: item.penalty ?? null,
     },
   }));
+
+  const currentStrainSlugs = new Set(data.strains.map((s) => s.slug));
+  const { data: existingStrains } = await supabase
+    .from("catalog")
+    .select("slug")
+    .eq("type", "strain");
+  const toRemove = (existingStrains ?? []).filter(
+    (r: { slug: string }) => !currentStrainSlugs.has(r.slug)
+  );
+  if (toRemove.length > 0) {
+    for (const row of toRemove) {
+      await supabase.from("catalog").delete().eq("type", "strain").eq("slug", row.slug);
+    }
+  }
 
   if (strainRows.length > 0) {
     const { error: strainsError } = await supabase

@@ -31,6 +31,7 @@ type CollectibleRow = {
   base_hp: number;
   base_atk: number;
   base_mana: number;
+  image_url: string | null;
 };
 
 type StrainRow = {
@@ -68,7 +69,7 @@ export default async function AdminPage() {
     await Promise.all([
       supabase
         .from("collectibles_catalog")
-        .select("id, slug, name, rarity, series, model_key, base_hp, base_atk, base_mana")
+        .select("id, slug, name, rarity, series, model_key, base_hp, base_atk, base_mana, image_url")
         .order("rarity", { ascending: true }),
       supabase
         .from("strains_catalog")
@@ -140,6 +141,7 @@ export default async function AdminPage() {
           <Input name="base_hp" type="number" min={0} placeholder="HP" defaultValue={0} />
           <Input name="base_atk" type="number" min={0} placeholder="ATK" defaultValue={0} />
           <Input name="base_mana" type="number" min={0} placeholder="Mana" defaultValue={0} />
+          <Input name="image_url" placeholder="Image URL" />
           <select
             name="rarity"
             className="h-11 rounded-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
@@ -180,6 +182,7 @@ export default async function AdminPage() {
                 <Input name="base_hp" type="number" min={0} defaultValue={item.base_hp ?? 0} />
                 <Input name="base_atk" type="number" min={0} defaultValue={item.base_atk ?? 0} />
                 <Input name="base_mana" type="number" min={0} defaultValue={item.base_mana ?? 0} />
+                <Input name="image_url" defaultValue={item.image_url ?? ""} placeholder="Image URL" />
                 <select
                   name="rarity"
                   defaultValue={item.rarity}

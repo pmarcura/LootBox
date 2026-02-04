@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { UserCardItem } from "../types";
 
 type UserCardCardProps = {
@@ -7,8 +8,26 @@ type UserCardCardProps = {
 };
 
 export function UserCardCard({ card }: UserCardCardProps) {
+  const hasImage = Boolean(card.imageUrl);
+
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border-2 border-violet-200 bg-white shadow-md dark:border-violet-800 dark:bg-zinc-950">
+      <div className="relative aspect-[2816/1536] w-full shrink-0 overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+        {hasImage ? (
+          <Image
+            src={card.imageUrl!}
+            alt={card.vesselName ?? "Carta fundida"}
+            fill
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, 33vw"
+            unoptimized={card.imageUrl!.startsWith("/")}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-violet-500/10 text-violet-600 dark:text-violet-400">
+            <span className="text-sm font-medium">Carta</span>
+          </div>
+        )}
+      </div>
       <div className="flex flex-1 flex-col p-4">
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
           {card.vesselName ?? "Carta fundida"}

@@ -15,6 +15,7 @@ const collectibleSchema = z.object({
   rarity: z.enum(["common", "uncommon", "rare", "epic", "legendary"]),
   series: z.string().optional(),
   model_key: z.string().optional(),
+  image_url: z.string().optional().nullable(),
   base_hp: z.coerce.number().int().min(0).optional().default(0),
   base_atk: z.coerce.number().int().min(0).optional().default(0),
   base_mana: z.coerce.number().int().min(0).optional().default(0),
@@ -28,6 +29,7 @@ function parseCollectibleForm(formData: FormData) {
     rarity: formData.get("rarity"),
     series: formData.get("series") || undefined,
     model_key: formData.get("model_key") || undefined,
+    image_url: formData.get("image_url") || undefined,
     base_hp: formData.get("base_hp"),
     base_atk: formData.get("base_atk"),
     base_mana: formData.get("base_mana"),
@@ -43,6 +45,7 @@ export async function createCollectibleAction(formData: FormData) {
     slug: payload.slug,
     name: payload.name,
     rarity: payload.rarity,
+    imageUrl: payload.image_url ?? null,
     attributes: {
       base_hp: payload.base_hp,
       base_atk: payload.base_atk,
@@ -84,6 +87,7 @@ export async function updateCollectibleAction(formData: FormData) {
       slug: payload.slug,
       name: payload.name,
       rarity: payload.rarity,
+      imageUrl: payload.image_url ?? null,
       attributes,
       updatedAt: new Date(),
     })

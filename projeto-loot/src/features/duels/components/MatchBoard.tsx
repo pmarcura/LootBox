@@ -94,7 +94,7 @@ function SlotCard({
           src={card.image_url}
           alt=""
           fill
-          className="object-cover object-center"
+          objectFit="contain"
         >
           <div className="h-12 w-full shrink-0 bg-zinc-800 flex items-center justify-center gap-2 text-zinc-500 text-xs">
           <span className="inline-flex items-center gap-0.5">
@@ -225,7 +225,7 @@ function HandCard({
             src={c.image_url}
             alt=""
             fill
-            className="object-cover object-center"
+            objectFit="contain"
           >
             <div className="h-full w-full flex items-center justify-center gap-1.5 text-zinc-500 text-xs">
               <span className="inline-flex items-center gap-0.5">
