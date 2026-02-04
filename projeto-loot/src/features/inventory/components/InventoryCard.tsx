@@ -40,6 +40,25 @@ export function InventoryCard({ item }: InventoryCardProps) {
 
   const [state, formAction, isPending] = useActionState(dissolveAction, null);
 
+  // #region agent log
+  useEffect(() => {
+    if (state != null) {
+      fetch("http://127.0.0.1:7242/ingest/b2980132-5a33-48b9-a0c6-16efe37f4939", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          location: "InventoryCard.tsx:state",
+          message: "dissolve state updated",
+          data: { ok: state?.ok, message: state && !state.ok ? (state as { message?: string }).message : undefined },
+          hypothesisId: "H1",
+          timestamp: Date.now(),
+          sessionId: "debug-session",
+        }),
+      }).catch(() => {});
+    }
+  }, [state]);
+  // #endregion
+
   useEffect(() => {
     if (state?.ok) {
       setModalOpen(false);
@@ -196,9 +215,16 @@ export function InventoryCard({ item }: InventoryCardProps) {
               ser desfeita.
             </p>
             {state && !state.ok && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                {state.message}
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {state.message}
+                </p>
+                {"debugMessage" in state && state.debugMessage && (
+                  <pre className="max-h-32 overflow-auto rounded bg-zinc-100 p-2 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {state.debugMessage}
+                  </pre>
+                )}
+              </div>
             )}
             <form action={formAction} className="mt-5 flex gap-3">
               <input
