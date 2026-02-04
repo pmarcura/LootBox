@@ -22,6 +22,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function buildGroupsBySeries(
   data: InventoryRow[],
+  consumedIds: Set<string>,
 ): Map<string, InventoryItemGrouped[]> {
   const bySeriesAndCollectible = new Map<
     string,
@@ -37,18 +38,19 @@ function buildGroupsBySeries(
     const seriesKey = collectible.series ?? "sem-serie";
     const collectibleKey = collectible.id;
     const key = `${seriesKey}::${collectibleKey}`;
+    const canDissolve = !consumedIds.has(row.id);
 
     const existing = bySeriesAndCollectible.get(key);
     if (existing) {
       existing.ids.push(row.id);
-      if (!row.is_used) existing.dissolveableIds.push(row.id);
+      if (canDissolve) existing.dissolveableIds.push(row.id);
       if (row.acquired_at > existing.acquiredAt) {
         existing.acquiredAt = row.acquired_at;
       }
     } else {
       bySeriesAndCollectible.set(key, {
         ids: [row.id],
-        dissolveableIds: row.is_used ? [] : [row.id],
+        dissolveableIds: canDissolve ? [row.id] : [],
         acquiredAt: row.acquired_at,
         collectible,
       });
@@ -104,33 +106,53 @@ export default async function InventoryPage() {
     redirect("/login?redirect=/inventory");
   }
 
-  const [inventoryRes, strainsRes, cardsRes] = await Promise.all([
-    supabase
-      .from("user_inventory")
-      .select(
-        "id, acquired_at, is_used, collectible:collectibles_catalog(id, name, slug, rarity, image_url, series)",
-      )
-      .eq("user_id", user.id)
-      .order("acquired_at", { ascending: false }),
-    supabase
-      .from("user_strains")
-      .select(
-        "id, acquired_at, is_used, strain:strains_catalog(id, name, slug, rarity, family)",
-      )
-      .eq("user_id", user.id)
-      .order("acquired_at", { ascending: false }),
-    supabase
-      .from("user_cards")
-      .select("id, token_id, final_hp, final_atk, mana_cost, keyword, created_at, vessel_collectible_id")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false }),
-  ]);
+  const [inventoryRes, strainsRes, cardsRes, ledgerInvRes, ledgerStrainRes] =
+    await Promise.all([
+      supabase
+        .from("user_inventory")
+        .select(
+          "id, acquired_at, collectible:collectibles_catalog(id, name, slug, rarity, image_url, series)",
+        )
+        .eq("user_id", user.id)
+        .order("acquired_at", { ascending: false }),
+      supabase
+        .from("user_strains")
+        .select(
+          "id, acquired_at, strain:strains_catalog(id, name, slug, rarity, family)",
+        )
+        .eq("user_id", user.id)
+        .order("acquired_at", { ascending: false }),
+      supabase
+        .from("user_cards")
+        .select("id, token_id, final_hp, final_atk, mana_cost, keyword, created_at, vessel_collectible_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("audit_inventory_ledger")
+        .select("original_id")
+        .eq("user_id", user.id),
+      supabase
+        .from("audit_strains_ledger")
+        .select("original_id")
+        .eq("user_id", user.id),
+    ]);
+
+  const consumedInventoryIds = new Set(
+    (ledgerInvRes.data ?? []).map(
+      (r: { original_id: string }) => r.original_id,
+    ),
+  );
+  const consumedStrainIds = new Set(
+    (ledgerStrainRes.data ?? []).map(
+      (r: { original_id: string }) => r.original_id,
+    ),
+  );
 
   const rows = (inventoryRes.data ?? []) as InventoryRow[];
-  const groupsBySeries = buildGroupsBySeries(rows);
+  const groupsBySeries = buildGroupsBySeries(rows, consumedInventoryIds);
 
   const strainRows = (strainsRes.data ?? []) as StrainRow[];
-  const strainGroups = buildStrainGroups(strainRows);
+  const strainGroups = buildStrainGroups(strainRows, consumedStrainIds);
 
   const cardsData = (cardsRes.data ?? []) as CardRow[];
   const vesselCollectibleIds = cardsData
@@ -240,6 +262,7 @@ export default async function InventoryPage() {
 
 function buildStrainGroups(
   data: StrainRow[],
+  consumedIds: Set<string>,
 ): Map<string, StrainItemGrouped[]> {
   const byStrain = new Map<
     string,
@@ -250,16 +273,17 @@ function buildStrainGroups(
     const strain = Array.isArray(row.strain) ? row.strain[0] : row.strain;
     if (!strain) continue;
     const key = strain.id;
+    const canDissolve = !consumedIds.has(row.id);
 
     const existing = byStrain.get(key);
     if (existing) {
       existing.ids.push(row.id);
-      if (!row.is_used) existing.dissolveableIds.push(row.id);
+      if (canDissolve) existing.dissolveableIds.push(row.id);
       if (row.acquired_at > existing.acquiredAt) existing.acquiredAt = row.acquired_at;
     } else {
       byStrain.set(key, {
         ids: [row.id],
-        dissolveableIds: row.is_used ? [] : [row.id],
+        dissolveableIds: canDissolve ? [row.id] : [],
         acquiredAt: row.acquired_at,
         strain,
       });

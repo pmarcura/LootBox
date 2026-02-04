@@ -59,7 +59,13 @@ export async function dissolveAction(
         sql`select pg_advisory_xact_lock(hashtext(${userId}::text))`
       );
 
-      const rows = await tx
+      const consumedIds = await tx
+        .select({ originalId: auditInventoryLedger.originalId })
+        .from(auditInventoryLedger)
+        .where(eq(auditInventoryLedger.userId, userId));
+      const consumedSet = new Set(consumedIds.map((r) => r.originalId));
+
+      const allRows = await tx
         .select({
           id: userInventory.id,
           collectibleId: userInventory.collectibleId,
@@ -72,12 +78,9 @@ export async function dissolveAction(
           eq(collectiblesCatalog.id, userInventory.collectibleId)
         )
         .where(
-          and(
-            eq(userInventory.userId, userId),
-            eq(userInventory.isUsed, false),
-            inArray(userInventory.id, ids)
-          )
+          and(eq(userInventory.userId, userId), inArray(userInventory.id, ids))
         );
+      const rows = allRows.filter((r) => !consumedSet.has(r.id));
 
       if (rows.length === 0) {
         throw new Error("no_valid_cards");

@@ -60,7 +60,13 @@ export async function dissolveStrainsAction(
         sql`select pg_advisory_xact_lock(hashtext(${userId}::text))`
       );
 
-      const rows = await tx
+      const consumedIds = await tx
+        .select({ originalId: auditStrainsLedger.originalId })
+        .from(auditStrainsLedger)
+        .where(eq(auditStrainsLedger.userId, userId));
+      const consumedSet = new Set(consumedIds.map((r) => r.originalId));
+
+      const allRows = await tx
         .select({
           id: userStrains.id,
           strainId: userStrains.strainId,
@@ -73,12 +79,9 @@ export async function dissolveStrainsAction(
           eq(strainsCatalog.id, userStrains.strainId)
         )
         .where(
-          and(
-            eq(userStrains.userId, userId),
-            eq(userStrains.isUsed, false),
-            inArray(userStrains.id, ids)
-          )
+          and(eq(userStrains.userId, userId), inArray(userStrains.id, ids))
         );
+      const rows = allRows.filter((r) => !consumedSet.has(r.id));
 
       if (rows.length === 0) {
         throw new Error("no_valid_strains");

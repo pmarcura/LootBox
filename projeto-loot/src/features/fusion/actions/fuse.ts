@@ -71,6 +71,15 @@ export async function fuseCardAction(
         sql`select pg_advisory_xact_lock(hashtext(${userId}::text))`
       );
 
+      const vesselConsumed = await tx
+        .select({ originalId: auditInventoryLedger.originalId })
+        .from(auditInventoryLedger)
+        .where(
+          and(
+            eq(auditInventoryLedger.userId, userId),
+            eq(auditInventoryLedger.originalId, vesselInventoryId)
+          )
+        );
       const [vesselRow] = await tx
         .select({
           id: userInventory.id,
@@ -89,13 +98,22 @@ export async function fuseCardAction(
         .where(
           and(
             eq(userInventory.userId, userId),
-            eq(userInventory.id, vesselInventoryId),
-            eq(userInventory.isUsed, false)
+            eq(userInventory.id, vesselInventoryId)
           )
         );
 
-      if (!vesselRow) throw new Error("vessel_not_found_or_used");
+      if (!vesselRow || vesselConsumed.length > 0)
+        throw new Error("vessel_not_found_or_used");
 
+      const strainConsumed = await tx
+        .select({ originalId: auditStrainsLedger.originalId })
+        .from(auditStrainsLedger)
+        .where(
+          and(
+            eq(auditStrainsLedger.userId, userId),
+            eq(auditStrainsLedger.originalId, userStrainId)
+          )
+        );
       const [strainRow] = await tx
         .select({
           id: userStrains.id,
@@ -112,10 +130,12 @@ export async function fuseCardAction(
         .where(
           and(
             eq(userStrains.userId, userId),
-            eq(userStrains.id, userStrainId),
-            eq(userStrains.isUsed, false)
+            eq(userStrains.id, userStrainId)
           )
         );
+
+      if (!strainRow || strainConsumed.length > 0)
+        throw new Error("strain_not_found_or_used");
 
       if (!strainRow) throw new Error("strain_not_found_or_used");
 

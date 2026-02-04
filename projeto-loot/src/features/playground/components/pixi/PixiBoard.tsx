@@ -111,6 +111,10 @@ export function PixiBoard({
   const myMana = myRole === "player1" ? state.player1Mana : state.player2Mana;
   const myLife = myRole === "player1" ? state.player1Life : state.player2Life;
   const oppLife = myRole === "player1" ? state.player2Life : state.player1Life;
+  const myMaxLife =
+    state.config?.player1StartingLife ?? state.config?.startingLife ?? 30;
+  const oppMaxLife =
+    state.config?.player2StartingLife ?? state.config?.startingLife ?? 30;
   const oppHandCount = state.cards.filter(
     (c) => c.owner === oppRole && c.position === "hand"
   ).length;
@@ -241,7 +245,7 @@ export function PixiBoard({
               width={70}
               height={18}
               current={oppLife}
-              max={state.config?.startingLife ?? 30}
+              max={oppMaxLife}
               color={0xef4444}
             />
           </pixiContainer>
@@ -294,7 +298,7 @@ export function PixiBoard({
               width={70}
               height={18}
               current={myLife}
-              max={state.config?.startingLife ?? 30}
+              max={myMaxLife}
               color={0xfbbf24}
             />
             {[0, 1, 2].map((i) => {

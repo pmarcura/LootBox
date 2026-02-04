@@ -10,7 +10,7 @@ export type InventoryItem = {
   imageUrl?: string | null;
 };
 
-/** Grouped by series and collectible; only dissolveableIds (is_used=false) can be dissolved */
+/** Grouped by series and collectible; dissolveableIds = ids not consumed (not in audit ledger) */
 export type InventoryItemGrouped = {
   collectibleId: string;
   name: string;
@@ -66,7 +66,6 @@ export type CollectibleRow = {
 export type InventoryRow = {
   id: string;
   acquired_at: string;
-  is_used: boolean;
   collectible: CollectibleRow | CollectibleRow[] | null;
 };
 
@@ -81,6 +80,5 @@ export type StrainCatalogRow = {
 export type StrainRow = {
   id: string;
   acquired_at: string;
-  is_used: boolean;
   strain: StrainCatalogRow | StrainCatalogRow[];
 };

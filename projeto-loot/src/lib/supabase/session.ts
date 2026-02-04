@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "./server";
 export type LayoutProfile = {
   is_admin: boolean;
   essence_balance: number;
+  experience: number;
   display_name: string | null;
   avatar_url: string | null;
   starter_pack_granted_at: string | null;
@@ -34,7 +35,7 @@ export const getLayoutSession = cache(async (): Promise<LayoutSession> => {
 
   const { data: profileRow } = await supabase
     .from("profiles")
-    .select("is_admin, essence_balance, display_name, avatar_url, starter_pack_granted_at")
+    .select("is_admin, essence_balance, experience, display_name, avatar_url, starter_pack_granted_at")
     .eq("id", user.id)
     .single();
 
@@ -42,6 +43,7 @@ export const getLayoutSession = cache(async (): Promise<LayoutSession> => {
     ? {
         is_admin: profileRow.is_admin ?? false,
         essence_balance: Number(profileRow.essence_balance ?? 0),
+        experience: Number(profileRow.experience ?? 0),
         display_name: profileRow.display_name ?? null,
         avatar_url: profileRow.avatar_url ?? null,
         starter_pack_granted_at: profileRow.starter_pack_granted_at ?? null,

@@ -278,6 +278,7 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
   const setActiveCombatLane = useBattleStore((s) => s.setActiveCombatLane);
   const setRoundAdvanceMessage = useBattleStore((s) => s.setRoundAdvanceMessage);
   const activeCombatLane = useBattleStore((s) => s.activeCombatLane);
+  const myAllyIndex = useBattleStore((s) => s.myAllyIndex);
 
   React.useEffect(() => {
     if (combatEvents?.length) setCombatEventIndex(0);
@@ -500,7 +501,6 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
   const myRole = mode === "vs-amigo" ? matchState.currentTurn : ("player1" as const);
   const oppRole = myRole === "player1" ? "player2" : "player1";
   const currentAction = matchState.currentAction ?? matchState.currentTurn;
-  const myAllyIndex = useBattleStore((s) => s.myAllyIndex);
   const isCoop = mode === "coop";
   const isMyTurn =
     matchState.status === "active" &&
@@ -514,6 +514,14 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
   const myMana = myRole === "player1" ? matchState.player1Mana : matchState.player2Mana;
   const myLife = myRole === "player1" ? matchState.player1Life : matchState.player2Life;
   const oppLife = myRole === "player1" ? matchState.player2Life : matchState.player1Life;
+  const myMaxLife =
+    matchState.config?.player1StartingLife ??
+    matchState.config?.startingLife ??
+    30;
+  const oppMaxLife =
+    matchState.config?.player2StartingLife ??
+    matchState.config?.startingLife ??
+    30;
 
   const slotCountState = getSlotCount(matchState);
   const myBoardBySlot: (CardInMatch | null)[] = Array.from({ length: slotCountState }, () => null);
@@ -681,7 +689,7 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
             </p>
             <AnimatedLifeBar
               value={oppLife}
-              max={matchState.config?.startingLife ?? 30}
+              max={oppMaxLife}
               variant="opponent"
               data-testid="playground-opp-life"
               data-player-life={oppRole}
@@ -747,7 +755,7 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
             </p>
             <AnimatedLifeBar
               value={myLife}
-              max={matchState.config?.startingLife ?? 30}
+              max={myMaxLife}
               variant="player"
               data-testid="playground-my-life"
               data-player-life={myRole}

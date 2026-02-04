@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { getCoopDraftPool } from "@/features/playground/lib/coop-decks";
 import { createRunState } from "@/features/playground/lib/run-state";
 import type { PlaygroundCard } from "@/features/playground/lib/types";
 import type { CoopLobby } from "../actions/lobby";
@@ -26,18 +25,46 @@ export function loadRunStateFromStorage(): ReturnType<typeof createRunState> | n
   }
 }
 
+type UserCardForDeck = {
+  id: string;
+  final_hp: number;
+  final_atk: number;
+  mana_cost: number;
+  keyword: string;
+};
+
+function toPlaygroundCard(c: UserCardForDeck): PlaygroundCard {
+  return {
+    id: c.id,
+    final_hp: c.final_hp,
+    final_atk: c.final_atk,
+    mana_cost: c.mana_cost,
+    keyword: c.keyword,
+    image_url: null,
+  };
+}
+
 type CoopDraftClientProps = {
   lobbyId: string | null;
   lobby: CoopLobby | null;
+  initialDeckCards: UserCardForDeck[];
 };
 
-export function CoopDraftClient({ lobbyId, lobby }: CoopDraftClientProps) {
-  const [pool] = React.useState(() => getCoopDraftPool());
+export function CoopDraftClient({
+  lobbyId,
+  lobby,
+  initialDeckCards,
+}: CoopDraftClientProps) {
+  const pool = React.useMemo(
+    () => initialDeckCards.map(toPlaygroundCard),
+    [initialDeckCards],
+  );
   const [selected, setSelected] = React.useState<PlaygroundCard[]>([]);
   const [error, setError] = React.useState<string | null>(null);
 
   const filledWithBot = lobby?.filled_with_bot ?? false;
   const targetCount = 10;
+  const hasEnoughCards = pool.length >= targetCount;
 
   const toggle = (card: PlaygroundCard) => {
     const idx = selected.findIndex((c) => c.id === card.id);
@@ -69,11 +96,30 @@ export function CoopDraftClient({ lobbyId, lobby }: CoopDraftClientProps) {
     );
   }
 
+  if (!hasEnoughCards) {
+    return (
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+        <p className="text-zinc-400">
+          Você precisa de pelo menos {targetCount} cartas no inventário para jogar coop. Você tem{" "}
+          {pool.length}. Resgate códigos ou fusione cartas para obter mais.
+        </p>
+        <div className="mt-4 flex gap-2">
+          <Button variant="secondary" asChild>
+            <Link href="/coop">Voltar ao Coop</Link>
+          </Button>
+          <Button variant="primary" asChild>
+            <Link href="/inventory">Ver inventário</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <p className="text-sm text-zinc-400">
-        Escolha {targetCount} cartas para o deck da run. Deck compartilhado com seu aliado
-        {filledWithBot ? " (bot)." : "."}
+        Escolha {targetCount} cartas do seu inventário para o deck da run. Deck compartilhado com
+        seu aliado{filledWithBot ? " (bot)." : "."}
       </p>
       <p className="text-sm font-medium text-zinc-200">
         Selecionadas: {selected.length} / {targetCount}

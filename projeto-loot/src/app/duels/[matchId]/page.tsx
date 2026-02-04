@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { ExperienceBar } from "@/components/ui/ExperienceBar";
 import { MatchBoardHybrid } from "@/features/duels/components/MatchBoardHybrid";
 import { MatchSummary } from "@/features/duels/components/MatchSummary";
 import type { MatchEventRow } from "@/features/duels/components/MatchActionLog";
@@ -106,6 +107,22 @@ export default async function MatchPage({
   const myDeckCount = cards.filter((c) => c.owner === myRole && c.position === "deck").length;
   const myDiscardCount = cards.filter((c) => c.owner === myRole && c.position === "discard").length;
 
+  const xpGained =
+    match.status === "finished" && match.winner_id
+      ? match.winner_id === user.id
+        ? 50
+        : 20
+      : 0;
+  let profileExperience = 0;
+  if (match.status === "finished") {
+    const { data: profileRow } = await supabase
+      .from("profiles")
+      .select("experience")
+      .eq("id", user.id)
+      .single();
+    profileExperience = Number(profileRow?.experience ?? 0);
+  }
+
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-8 text-zinc-100">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
@@ -129,7 +146,20 @@ export default async function MatchPage({
             <p className="text-lg font-semibold">
               {match.winner_id === user.id ? "Você venceu!" : "Você perdeu."}
             </p>
-            <Link href="/duels" className="mt-2 inline-block text-sm text-amber-400 underline">
+            {xpGained > 0 && (
+              <div className="mt-4 rounded-xl border border-violet-800/50 bg-violet-950/30 px-4 py-3">
+                <p className="text-sm font-medium text-violet-300">
+                  XP ganho nesta partida: <span className="text-violet-200">+{xpGained}</span>
+                </p>
+                <p className="mt-1 text-xs text-zinc-400">
+                  Experiência total: {profileExperience} XP
+                </p>
+                <div className="mx-auto mt-2 max-w-[200px]">
+                  <ExperienceBar experience={profileExperience} showLevel compact={false} />
+                </div>
+              </div>
+            )}
+            <Link href="/duels" className="mt-4 inline-block text-sm text-amber-400 underline">
               Voltar aos duelos
             </Link>
             <MatchSummary

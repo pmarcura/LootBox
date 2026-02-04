@@ -37,6 +37,46 @@ export async function requestFriendByEmail(
   return { status: "success", message: "Pedido enviado!" };
 }
 
+const displayNameSchema = z
+  .string()
+  .min(1, "Digite o nome.")
+  .transform((s) => s.trim())
+  .refine((s) => s.length > 0, "Digite o nome.");
+
+export async function requestFriendByDisplayName(
+  _prevState: RequestFriendState,
+  formData: FormData,
+): Promise<RequestFriendState> {
+  const name = formData.get("displayName");
+  const parsed = displayNameSchema.safeParse(name);
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message ?? "Digite o nome." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc("request_friend_by_display_name", {
+    p_display_name: parsed.data,
+  });
+
+  if (error) {
+    const msg =
+      error.message === "user_not_found"
+        ? "Nenhum usuário encontrado com esse nome."
+        : error.message === "multiple_users_same_name"
+          ? "Vários usuários com esse nome. Use o email para adicionar."
+          : error.message === "cannot_add_self"
+            ? "Você não pode adicionar a si mesmo."
+            : error.message === "already_friends"
+              ? "Vocês já são amigos."
+              : error.message === "request_already_sent"
+                ? "Você já enviou um pedido para esse jogador."
+                : "Não foi possível enviar o pedido. Tente novamente.";
+    return { status: "error", message: msg };
+  }
+
+  return { status: "success", message: "Pedido enviado!" };
+}
+
 export async function acceptFriendRequest(requestId: string): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.rpc("respond_friend_request", {

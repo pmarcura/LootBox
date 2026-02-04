@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
   requestFriendByEmail,
+  requestFriendByDisplayName,
   acceptFriendRequest,
   rejectFriendRequest,
   type RequestFriendState,
@@ -68,6 +69,11 @@ export function FriendsPanel({ friends: initialFriends, incomingRequests: initia
     requestFriendByEmail,
     { status: "idle" },
   );
+  const [stateByName, formActionByName, isPendingByName] =
+    React.useActionState<RequestFriendState, FormData>(
+      requestFriendByDisplayName,
+      { status: "idle" },
+    );
 
   const handleAccept = async (requestId: string) => {
     const { ok } = await acceptFriendRequest(requestId);
@@ -117,6 +123,56 @@ export function FriendsPanel({ friends: initialFriends, incomingRequests: initia
             {state.message}
           </p>
         )}
+
+        <div className="mt-6 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Ou pelo nome do perfil</p>
+          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+            Nome definido no perfil. Se houver mais de um com o mesmo nome, use o email.
+          </p>
+          <form
+            action={formActionByName}
+            className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end"
+          >
+            <label className="flex-1">
+              <span className="sr-only">Nome do jogador</span>
+              <Input
+                type="text"
+                name="displayName"
+                placeholder="Nome no perfil"
+                autoComplete="off"
+                aria-describedby={
+                  stateByName.status === "error"
+                    ? "add-friend-by-name-error"
+                    : stateByName.status === "success"
+                      ? "add-friend-by-name-success"
+                      : undefined
+                }
+                disabled={isPendingByName}
+                className="w-full"
+              />
+            </label>
+            <Button type="submit" variant="secondary" disabled={isPendingByName}>
+              {isPendingByName ? "Enviando…" : "Enviar por nome"}
+            </Button>
+          </form>
+          {stateByName.status === "success" && (
+            <p
+              id="add-friend-by-name-success"
+              className="mt-2 text-sm text-emerald-600 dark:text-emerald-400"
+            >
+              {stateByName.message}
+            </p>
+          )}
+          {stateByName.status === "error" && (
+            <p
+              id="add-friend-by-name-error"
+              role="alert"
+              className="mt-2 text-sm text-red-600 dark:text-red-400"
+            >
+              {stateByName.message}
+            </p>
+          )}
+        </div>
       </section>
 
       {incomingRequests.length > 0 && (

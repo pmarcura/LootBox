@@ -75,7 +75,6 @@ export const userInventory = pgTable("user_inventory", {
     .defaultNow(),
   source: text("source").notNull().default("redemption"),
   redemptionCodeHash: text("redemption_code_hash"),
-  isUsed: boolean("is_used").notNull().default(false),
 });
 
 export const userStrains = pgTable("user_strains", {
@@ -90,7 +89,6 @@ export const userStrains = pgTable("user_strains", {
     .notNull()
     .defaultNow(),
   source: text("source").notNull().default("redemption"),
-  isUsed: boolean("is_used").notNull().default(false),
 });
 
 export const userCards = pgTable("user_cards", {

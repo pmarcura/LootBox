@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { EssenceBadge } from "@/components/ui/EssenceBadge";
+import { ExperienceBar } from "@/components/ui/ExperienceBar";
 import type { LayoutSession } from "@/lib/supabase/session";
 import { UserMenu } from "./UserMenu";
 
@@ -10,6 +11,7 @@ export function Header({ session }: HeaderProps) {
   const { user, profile } = session;
   const isAdmin = profile?.is_admin ?? false;
   const essenceBalance = profile?.essence_balance ?? 0;
+  const experience = profile?.experience ?? 0;
   const displayName = profile?.display_name ?? null;
   const avatarUrl = profile?.avatar_url ?? null;
 
@@ -26,9 +28,14 @@ export function Header({ session }: HeaderProps) {
 
         {/* Navegação principal fica na barra inferior (NavBottomWrapper no layout) */}
 
-        {/* Essence balance + User Menu */}
-        <div className="flex items-center gap-4">
-          {user && <EssenceBadge amount={essenceBalance} />}
+        {/* Essence + XP + User Menu */}
+        <div className="flex items-center gap-3 md:gap-4">
+          {user && (
+            <>
+              <ExperienceBar experience={experience} compact showLevel />
+              <EssenceBadge amount={essenceBalance} />
+            </>
+          )}
           <UserMenu
             user={user}
             userId={user?.id ?? null}
