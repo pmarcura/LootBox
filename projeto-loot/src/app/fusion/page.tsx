@@ -6,8 +6,8 @@ import { FusionLab } from "@/features/fusion/components/FusionLab";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Lab de Fusão | Projeto Gênesis",
-  description: "Câmara de Sessão — combine 1 monstro e 1 planta para o bicho fazer sessão e virar carta jogável. Ambos são consumidos na fusão.",
+  title: "Fusão",
+  description: "Combine duas criaturas no laboratório e crie uma nova carta. O ponto de partida para decks mais fortes.",
 };
 
 export default async function FusionPage() {

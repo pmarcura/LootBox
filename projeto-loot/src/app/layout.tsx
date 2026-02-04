@@ -34,8 +34,12 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  title: "Projeto Gênesis",
-  description: "Redemption Engine para economia phygital de itens digitais.",
+  title: {
+    default: "Gênesis | Colecione, Fusione, Duelo",
+    template: "%s | Gênesis",
+  },
+  description:
+    "Resgate criaturas, fusione cartas e dispute partidas. O universo phygital começa aqui.",
 };
 
 export default async function RootLayout({

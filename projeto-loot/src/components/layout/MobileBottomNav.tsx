@@ -147,16 +147,18 @@ export function MobileBottomNav({ isAdmin }: MobileBottomNavProps) {
                   >
                     Clã
                   </Link>
-                  <Link
-                    href="/playground"
-                    role="menuitem"
-                    onClick={() => setMoreOpen(false)}
-                    className={`block px-4 py-3 text-sm transition-colors ${
-                      pathname.startsWith("/playground") ? "text-amber-400" : "text-zinc-200"
-                    }`}
-                  >
-                    Playground
-                  </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/playground"
+                      role="menuitem"
+                      onClick={() => setMoreOpen(false)}
+                      className={`block px-4 py-3 text-sm transition-colors ${
+                        pathname.startsWith("/playground") ? "text-amber-400" : "text-zinc-200"
+                      }`}
+                    >
+                      Playground
+                    </Link>
+                  )}
                   {isAdmin && (
                     <Link
                       href="/admin"

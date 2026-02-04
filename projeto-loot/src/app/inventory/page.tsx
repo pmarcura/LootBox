@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { InventoryTabs } from "@/features/inventory/components/InventoryTabs";
 
 export const metadata: Metadata = {
-  title: "Inventário | Projeto Gênesis",
-  description: "Seus vessels, strains e cartas fundidas. Dissolva itens não usados para ganhar essência.",
+  title: "Inventário",
+  description: "Suas criaturas, cartas e essência. Organize a coleção e prepare decks para os duelos.",
 };
 
 import type {

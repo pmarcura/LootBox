@@ -6,8 +6,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { GachaRedeemPanel } from "@/features/gacha/components/GachaRedeemPanel";
 
 export const metadata: Metadata = {
-  title: "Resgate de código | Projeto Gênesis",
-  description: "Resgate seu código e ganhe 1 vessel + 1 strain para o inventário.",
+  title: "Resgate",
+  description: "Resgate seu código e ganhe uma criatura para a coleção. Cada código vale uma carta.",
 };
 
 export default async function GachaPage() {

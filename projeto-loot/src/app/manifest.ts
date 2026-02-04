@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Projeto Gênesis",
+    name: "Gênesis",
     short_name: "Gênesis",
     description: "Redemption Engine — resgate códigos, colecione cartas e duele com amigos.",
     start_url: "/",

@@ -4,9 +4,63 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Início | Projeto Gênesis",
+  title: "Gênesis | Colecione, Fusione, Duelo",
   description:
-    "Phygital Redemption Engine — infraestrutura de resgate atômico para criaturas digitais com foco em antifraude e economia de itens.",
+    "Resgate criaturas únicas, fusione cartas e dispute partidas contra a IA ou amigos. O ponto de partida da sua coleção phygital.",
+};
+
+const FEATURES = [
+  {
+    title: "Resgatar",
+    body: "Use códigos físicos ou digitais para resgatar criaturas e adicionar à sua coleção. Cada código vale uma carta.",
+    href: "/gacha",
+    icon: (
+      <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+      </svg>
+    ),
+    accent: "violet",
+  },
+  {
+    title: "Fusão",
+    body: "Combine duas criaturas no laboratório e crie uma nova carta com atributos herdados. Experimente combinações e raridades.",
+    href: "/fusion",
+    icon: (
+      <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517L6 18.089V9a2 2 0 012-2h10a2 2 0 012 2v9.089l-2.161-1.194a6 6 0 00-3.86-.517l-2.386.477a2 2 0 00-1.022.547l-1.572 1.572a1 1 0 01-1.414 0l-1.414-1.414a1 1 0 010-1.414l1.572-1.572z" />
+      </svg>
+    ),
+    accent: "cyan",
+  },
+  {
+    title: "Duelos",
+    body: "Jogue contra a IA, desafie um amigo ou enfrente ondas no modo coop. Monte seu deck e dispute partidas estratégicas.",
+    href: "/duels",
+    icon: (
+      <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    ),
+    accent: "emerald",
+  },
+  {
+    title: "Inventário",
+    body: "Suas criaturas, cartas e essência em um só lugar. Organize, dissolva e prepare decks para os duelos.",
+    href: "/inventory",
+    icon: (
+      <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+      </svg>
+    ),
+    accent: "amber",
+  },
+];
+
+const accentBorder: Record<string, string> = {
+  violet: "border-violet-500/30 dark:border-violet-500/20",
+  cyan: "border-cyan-500/30 dark:border-cyan-500/20",
+  emerald: "border-emerald-500/30 dark:border-emerald-500/20",
+  amber: "border-amber-500/30 dark:border-amber-500/20",
 };
 
 export default async function Home() {
@@ -18,99 +72,118 @@ export default async function Home() {
   const isLoggedIn = !!user;
 
   return (
-    <main className="bg-zinc-50 px-6 py-12 dark:bg-black">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10">
-        <header className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm md:p-10 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">
-            Projeto Gênesis
+    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-zinc-200 bg-gradient-to-b from-white to-zinc-50/80 px-6 py-16 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950/80 md:py-24">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.12),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(139,92,246,0.08),transparent)]" />
+        <div className="relative mx-auto max-w-4xl text-center">
+          <p className="text-xs font-medium uppercase tracking-[0.35em] text-violet-600 dark:text-violet-400">
+            Gênesis
           </p>
-          <h1 className="mt-3 text-3xl font-semibold text-zinc-900 md:text-4xl dark:text-zinc-50">
-            Phygital Redemption Engine
+          <h1 className="mt-4 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 md:text-5xl">
+            Colecione. Fusione. Duelo.
           </h1>
-          <p className="mt-4 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">
-            Infraestrutura de resgate atômico para criaturas digitais com foco
-            em antifraude, integridade de dados e economia de itens.
+          <p className="mx-auto mt-5 max-w-xl text-lg text-zinc-600 dark:text-zinc-400">
+            Resgate criaturas únicas com códigos, fusione cartas no laboratório e dispute partidas contra a IA ou amigos. Seu universo phygital começa aqui.
           </p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4">
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             {isLoggedIn ? (
               <>
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
                   href="/gacha"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-violet-600 px-6 text-base font-medium text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500 dark:bg-violet-500 dark:shadow-violet-500/20 dark:hover:bg-violet-400"
                 >
                   Resgatar código
                 </Link>
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-full border border-zinc-200 px-5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-800"
                   href="/inventory"
+                  className="inline-flex h-12 items-center justify-center rounded-full border-2 border-zinc-300 bg-white px-6 text-base font-medium text-zinc-900 transition hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
                 >
-                  Ver meu inventário
+                  Meu inventário
+                </Link>
+                <Link
+                  href="/duels"
+                  className="inline-flex h-12 items-center justify-center rounded-full border-2 border-emerald-500/50 bg-emerald-500/10 px-6 text-base font-medium text-emerald-700 transition hover:bg-emerald-500/20 dark:border-emerald-400/50 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/20"
+                >
+                  Duelos
                 </Link>
               </>
             ) : (
               <>
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
                   href="/register"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-violet-600 px-6 text-base font-medium text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500 dark:bg-violet-500 dark:shadow-violet-500/20 dark:hover:bg-violet-400"
                 >
                   Criar conta grátis
                 </Link>
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-full border border-zinc-200 px-5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-800"
                   href="/login"
+                  className="inline-flex h-12 items-center justify-center rounded-full border-2 border-zinc-300 bg-white px-6 text-base font-medium text-zinc-900 transition hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
                 >
                   Já tenho conta
                 </Link>
               </>
             )}
           </div>
-        </header>
+        </div>
+      </section>
 
-        <section className="grid gap-6 md:grid-cols-3">
-          {[
-            {
-              title: "Atomicidade",
-              body: "Transação ACID com bloqueio advisory por código.",
-              icon: (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              ),
-            },
-            {
-              title: "Anti-fraude",
-              body: "Rate limiting no Edge e no Postgres com burn-on-redeem.",
-              icon: (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              ),
-            },
-            {
-              title: "Escalabilidade",
-              body: "Gacha server-side e catálogo modular por raridade.",
-              icon: (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              ),
-            },
-          ].map((card) => (
-            <div
-              key={card.title}
-              className="rounded-3xl border border-zinc-200 bg-white p-6 text-sm text-zinc-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400"
+      {/* Features */}
+      <section className="px-6 py-14 md:py-20">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-center text-2xl font-semibold text-zinc-900 dark:text-zinc-50 md:text-3xl">
+            O que você pode fazer
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-center text-zinc-600 dark:text-zinc-400">
+            Do resgate à batalha: um ecossistema phygital pensado para colecionadores e duelistas.
+          </p>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map((feature) => (
+              <Link
+                key={feature.title}
+                href={feature.href}
+                className={`group flex flex-col rounded-2xl border bg-white p-6 shadow-sm transition hover:shadow-md dark:bg-zinc-900 dark:hover:bg-zinc-800/80 ${accentBorder[feature.accent] ?? accentBorder.violet}`}
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:bg-violet-400/10 dark:text-violet-400">
+                  {feature.icon}
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                  {feature.title}
+                </h3>
+                <p className="mt-2 flex-1 text-sm text-zinc-600 dark:text-zinc-400">
+                  {feature.body}
+                </p>
+                <span className="mt-4 inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400">
+                  Acessar
+                  <svg className="ml-1 h-4 w-4 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA final para não logados */}
+      {!isLoggedIn && (
+        <section className="border-t border-zinc-200 bg-zinc-100/50 px-6 py-14 dark:border-zinc-800 dark:bg-zinc-900/50 md:py-18">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-zinc-200 bg-white p-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
+            <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+              Pronto para começar?
+            </h3>
+            <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+              Crie sua conta em segundos e receba um pacote inicial para começar a jogar.
+            </p>
+            <Link
+              href="/register"
+              className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-violet-600 px-6 text-sm font-medium text-white hover:bg-violet-500 dark:bg-violet-500 dark:hover:bg-violet-400"
             >
-              <div className="mb-3 text-zinc-400 dark:text-zinc-500">
-                {card.icon}
-              </div>
-              <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-                {card.title}
-              </h2>
-              <p className="mt-2">{card.body}</p>
-            </div>
-          ))}
+              Criar conta grátis
+            </Link>
+          </div>
         </section>
-      </div>
+      )}
     </main>
   );
 }

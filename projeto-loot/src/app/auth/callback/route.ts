@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/gacha";
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
 
   if (code) {
     const supabase = await createSupabaseServerClient();
@@ -21,11 +23,11 @@ export async function GET(request: Request) {
           .single();
         const target =
           profile?.is_admin && (next === "/gacha" || next === "/" || !next) ? "/admin" : redirectToPath;
-        return NextResponse.redirect(`${origin}${target}`);
+        return NextResponse.redirect(`${origin.replace(/\/$/, "")}${target}`);
       }
-      return NextResponse.redirect(`${origin}${redirectToPath}`);
+      return NextResponse.redirect(`${origin.replace(/\/$/, "")}${redirectToPath}`);
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_callback`);
+  return NextResponse.redirect(`${origin.replace(/\/$/, "")}/login?error=auth_callback`);
 }

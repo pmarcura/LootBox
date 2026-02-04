@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { DuelsModeCards } from "@/features/duels/components/DuelsModeCards";
 import { DuelsPanelDynamic } from "@/features/duels/components/DuelsPanelDynamic";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Duelos | Projeto Gênesis",
-  description: "Desafie amigos e jogue partidas com suas cartas fundidas.",
+  title: "Duelos",
+  description: "Jogue contra a IA, desafie amigos ou enfrente ondas no modo coop.",
 };
 
 export default async function DuelsPage() {
@@ -109,23 +110,30 @@ export default async function DuelsPage() {
         </nav>
 
         <header className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">
+          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500 dark:text-zinc-400">
             Duelos
           </p>
           <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-50">
             Partidas
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Desafie um amigo e jogue com suas cartas fundidas. Adicione amigos em Amigos para poder desafiar.
+            Jogue contra a IA, desafie amigos ou enfrente ondas no modo coop. Escolha um modo abaixo.
           </p>
         </header>
 
-        <DuelsPanelDynamic
+        <DuelsModeCards />
+
+        <section id="partidas-pvp" className="scroll-mt-6">
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            Partidas vs Amigo
+          </h2>
+          <DuelsPanelDynamic
           activeMatches={activeMatchesWithOpponent}
           pendingInvites={pendingInvitesWithChallenger}
           friends={friendsWithNames}
           initialDeckCards={initialDeckCards}
-        />
+          />
+        </section>
       </div>
     </main>
   );
