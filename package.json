@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "cd projeto-loot && npm run dev",
+    "build": "cd projeto-loot && npm run build",
+    "start": "cd projeto-loot && npm run start"
+  }
+}

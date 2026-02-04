@@ -1,0 +1,12 @@
+---
+description: Checklist contínuo de revisão e higiene
+alwaysApply: true
+---
+
+# Revisão contínua
+
+- Remover código morto, imports e variáveis não usadas.
+- Evitar mocks em fluxos críticos; usar dados reais sempre que possível.
+- Validar erros comuns de IA: nomes errados, funções inexistentes, params incorretos.
+- Rodar `npm run lint` e `npm run typecheck` antes de finalizar.
+- Conferir migrações, RLS e constraints após mudanças no schema.

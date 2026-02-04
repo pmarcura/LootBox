@@ -1,0 +1,15 @@
+---
+description: Padrões de segurança para Supabase e Next.js
+globs: src/**/*.ts, src/**/*.tsx, supabase/migrations/*.sql
+alwaysApply: true
+---
+
+# Segurança Gênesis 2026
+
+- RLS obrigatório em toda tabela SQL.
+- Nunca usar `service_role` no cliente; apenas em Server Actions ou scripts admin.
+- RPCs sensíveis devem ser `security definer` com `set search_path`.
+- Toda mutação deve passar por validação (Zod no app; constraints no DB).
+- Evitar bypass de RLS; políticas mínimas e explícitas.
+- Preferir `proxy.ts` para interceptação de rede em Next 17.
+- Usar `await` para `cookies()`, `headers()` e `params()` quando aplicável.

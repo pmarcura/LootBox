@@ -1,0 +1,63 @@
+---
+description: Design System do Projeto Gênesis - tokens, componentes e regras visuais. Seguir à risca em toda a UI.
+globs: ["**/*.tsx", "**/*.css", "**/globals.css"]
+alwaysApply: true
+---
+
+# Design System — Projeto Gênesis
+
+## Princípios
+- **Consistência**: mesma ação, mesmo visual. Reutilizar componentes em `src/components/ui/`.
+- **Não duplicar**: informações-chave (ex.: essência) aparecem UMA vez por contexto. Evitar repetição na mesma view.
+- **Mobile-first**: touch targets >= 44px; layout em coluna no mobile.
+
+## Tokens de cor
+
+### Neutros (texto, fundos)
+- `zinc-50` a `zinc-950`: escala neutra
+- Texto primário: `zinc-900` / `dark:zinc-50`
+- Texto secundário: `zinc-500` / `dark:zinc-400`
+- Bordas: `zinc-200` / `dark:zinc-700` ou `zinc-800`
+- Fundos de card: `white` / `dark:zinc-950`
+
+### Essência (moeda, CTA principal)
+- Primário: `amber-600` / `dark:amber-500`
+- Hover: `amber-700` / `dark:amber-600`
+- Badge/fundo: `amber-50` ou `amber-500/15` / `dark:amber-950/60`
+- Borda: `amber-300/60` / `dark:amber-700/50`
+- Texto: `amber-800` / `dark:amber-200`
+
+### Raridades (Badge)
+- common: `zinc-200` / `dark:zinc-800`
+- uncommon: `emerald-200` / `dark:emerald-900/40`
+- rare: `sky-200` / `dark:sky-900/40`
+- epic: `violet-200` / `dark:violet-900/40`
+- legendary: `amber-200` / `dark:amber-900/40`
+
+### Erro
+- `red-600` / `dark:red-400` para mensagens de erro
+
+## Componentes obrigatórios
+- **Botões**: usar `Button` de `@/components/ui/Button` (variants: primary, secondary, ghost)
+- **Badge essência**: usar `EssenceBadge` de `@/components/ui/EssenceBadge` — único lugar para exibir saldo na header
+- **Badge raridade**: usar `Badge` de `@/components/ui/Badge` com `tone`
+- **Inputs**: usar `Input` de `@/components/ui/Input`
+
+## Espaçamento e forma
+- `rounded-full`: botões principais
+- `rounded-xl` ou `rounded-2xl`: cards, modais, inputs
+- `gap-4` ou `gap-6`: entre elementos relacionados
+- `px-4 py-3` ou `px-6`: padding de containers
+- `min-h-[44px]`: altura mínima de botões e touch targets
+
+## Tipografia
+- Título de página: `text-2xl` ou `text-3xl` + `font-bold`
+- Subtítulo: `text-sm` + `text-zinc-500`
+- Labels: `text-xs` ou `text-sm` + `uppercase` + `tracking-wider` para seções
+
+## Regras críticas
+1. **Essência no header**: exibir APENAS no top bar (não repetir no nav mobile).
+2. **Raridade**: um único badge por card, em português (Comum, Incomum, Raro, Épico, Lendário).
+3. **Ações destrutivas** (dissolver, excluir): usar estilo secundário (borda/ghost), não primary.
+4. **Cores de raridade**: nunca inventar novas — usar apenas as do Badge.
+5. Ao adicionar novo componente de UI, verificar se já existe em `src/components/ui/` antes de criar inline.

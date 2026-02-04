@@ -1,0 +1,24 @@
+---
+description: Supabase env e onde rodar o dev para NEXT_PUBLIC_ carregar
+alwaysApply: false
+globs: **/env*.ts,**/.env*
+---
+
+# Supabase – .env.local e onde rodar o dev
+
+## Evitar "Missing required env var: NEXT_PUBLIC_SUPABASE_URL"
+
+As variáveis `NEXT_PUBLIC_*` só entram no bundle do navegador se o Next carregar o `.env.local` na raiz do projeto. Para isso:
+
+1. **Sempre rodar o servidor a partir da pasta do app** (onde está o `package.json` e o `.env.local`):  
+   `cd projeto-loot` (ou o caminho completo até essa pasta) e depois `npm run dev`.
+2. Não rodar `npm run dev` da pasta pai (ex.: `Projeto Loot`); senão o Next não acha o `.env.local` e as NEXT_PUBLIC_* ficam indefinidas no cliente.
+
+## Quando SUPABASE_SERVICE_ROLE_KEY ausente
+
+Se aparecer: **"[Supabase] SUPABASE_SERVICE_ROLE_KEY ausente..."**
+
+1. Garantir que `SUPABASE_SERVICE_ROLE_KEY` está no `.env.local` (chave **service_role** JWT do Supabase, não a anon).
+2. Nunca commitar `.env.local` nem colocar chaves em arquivos versionados.
+3. Reiniciar o servidor após alterar `.env.local`.
+4. Rodar o dev a partir da pasta `projeto-loot` (ver acima).

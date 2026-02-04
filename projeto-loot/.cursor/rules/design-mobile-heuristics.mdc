@@ -1,0 +1,25 @@
+---
+description: Heurísticas de UX mobile (Nielsen/Norman) e boas práticas. Complementa 000-design-system.mdc
+alwaysApply: true
+---
+
+# Heurísticas essenciais (Nielsen/Norman)
+- Visibilidade do status do sistema (feedback imediato e claro).
+- Correspondência com o mundo real (linguagem humana, metáforas consistentes).
+- Controle e liberdade do usuário (desfazer, cancelar, sair).
+- Consistência e padrões (mesma ação → mesmo comportamento).
+- Prevenção de erros (validações antes do envio).
+- Reconhecimento em vez de memorização (rótulos explícitos).
+- Flexibilidade e eficiência (atalhos quando possível).
+- Design estético e minimalista (sem ruído visual).
+- Ajuda na recuperação de erros (mensagens acionáveis).
+- Ajuda e documentação quando necessário.
+
+# Boas práticas mobile modernas
+- Touch targets >= 44px e espaçamento confortável.
+- Layout mobile-first, com hierarquia clara.
+- Inputs com labels visíveis e exemplos curtos.
+- Ações primárias destacadas e secundárias discretas.
+- Feedback de carregamento e estados vazios úteis.
+- Contraste adequado e tipografia legível em telas pequenas.
+- Evitar scroll horizontal; conteúdo em uma coluna no mobile.

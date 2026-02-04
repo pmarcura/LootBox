@@ -1,0 +1,12 @@
+---
+description: Segurança e integridade de dados
+alwaysApply: false
+---
+# Segurança e integridade
+- Mutações sensíveis devem ocorrer em RPC/SQL transacional.
+- Usar `pg_advisory_xact_lock` para recursos concorrentes e evitar race.
+- Manter `burn-on-redeem` na mesma transação da inserção no inventário.
+- Rate limiting obrigatório no Edge e reforço no Postgres.
+- RLS com “deny by default”; políticas explícitas e mínimas.
+- Funções `security definer` devem usar `set search_path`.
+- Nunca expor service role no client; apenas `anon` e JWT do usuário.

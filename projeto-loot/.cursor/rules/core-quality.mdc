@@ -1,0 +1,12 @@
+---
+description: Higiene e qualidade de código do projeto
+alwaysApply: false
+---
+# Qualidade e organização
+- Remover imports, variáveis, componentes e estilos não usados antes de finalizar.
+- Evitar duplicação: extrair utilidade quando lógica se repete.
+- Não deixar TODOs nem comentários “depois”; resolver no mesmo PR.
+- Sem dados mockados em fluxos reais; usar Supabase com dados válidos.
+- TypeScript estrito: evitar `any`; preferir validação com Zod nas fronteiras.
+- Não inventar endpoints, tabelas ou campos; sempre conferir no schema.
+- Evitar assets e textos padrão do template.

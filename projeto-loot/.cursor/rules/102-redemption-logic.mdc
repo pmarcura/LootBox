@@ -1,0 +1,13 @@
+---
+description: Regras para motor de resgate e geração de códigos
+globs: src/features/gacha/**, src/scripts/**
+alwaysApply: true
+---
+
+# Motor de Integridade Season 01
+
+- Alfabeto exclusivo: Crockford Base32 sem I, L, O, U e sem 0/1.
+- Checksum obrigatório com Verhoeff no dígito final.
+- Atomicidade: sorteio + resgate somente via RPC com `pg_advisory_xact_lock`.
+- Gacha ponderado no DB: 60/25/10/4/1.
+- Rejeitar códigos com caracteres ambíguos.
