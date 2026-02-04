@@ -9,6 +9,7 @@ import { DebugPanel } from "@/features/playground/components/DebugPanel";
 import { ScenarioEditor } from "@/features/playground/components/ScenarioEditor";
 import { SimulationPanel } from "@/features/playground/components/SimulationPanel";
 import type { GameConfig, PlaygroundCard } from "@/features/playground/lib/types";
+import type { BattleMode } from "@/features/playground/stores/battleStore";
 
 export function PlaygroundClient() {
   const [state, setState] = React.useState<boolean>(false);
@@ -28,8 +29,9 @@ export function PlaygroundClient() {
     pDeck: PlaygroundCard[],
     aDeck: PlaygroundCard[],
     cfg: GameConfig,
-    m: "vs-ia" | "vs-amigo"
+    m: BattleMode
   ) => {
+    if (m === "coop") return;
     setConfig(cfg);
     setPlayerDeck(pDeck);
     setAiDeck(aDeck);
