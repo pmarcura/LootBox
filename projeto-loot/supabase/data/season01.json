@@ -178,7 +178,7 @@
       "family": "SHELL",
       "description": "Posturado, mas meio lerdo. Impõe respeito só pela presença, mas não consegue revidar direito.",
       "penalty": "-50%",
-      "image_url": "/images/strains/Kush Genérico.png"
+      "image_url": "/images/strains/Kush%20Gen%C3%A9rico.png"
     },
     {
       "slug": "skunkzinho",
@@ -196,7 +196,7 @@
       "family": "NEURO",
       "description": "Disposição solar do Nordeste. Pilhado e agressivo, mas queima rápido feito pavio curto.",
       "penalty": "-40%",
-      "image_url": "/images/strains/Manga Rosa.png"
+      "image_url": "/images/strains/Manga%20Rosa.png"
     },
     {
       "slug": "pakistani-hash",
@@ -205,7 +205,7 @@
       "family": "SHELL",
       "description": "Postura de respeito importada. Firme e denso, mas lento demais pra reagir.",
       "penalty": "-40%",
-      "image_url": "/images/strains/Pakistani Hash.png"
+      "image_url": "/images/strains/Pakistani%20Hash.png"
     },
     {
       "slug": "gorilla-glue-4",
@@ -214,7 +214,7 @@
       "family": "PSYCHO",
       "description": "Larica grudenta. Morde e não solta, sugando vida do inimigo. Mas cansa fácil.",
       "penalty": "+1 Mana",
-      "image_url": "/images/strains/Gorilla Glue #4.png"
+      "image_url": "/images/strains/Gorilla%20Glue%20%234.png"
     },
     {
       "slug": "sour-diesel",
@@ -223,7 +223,7 @@
       "family": "NEURO",
       "description": "Disposição explosiva. Ataca antes do oponente piscar, mas se queima no processo.",
       "penalty": "-30%",
-      "image_url": "/images/strains/Sour Diesel.png"
+      "image_url": "/images/strains/Sour%20Diesel.png"
     },
     {
       "slug": "northern-lights",
@@ -232,7 +232,7 @@
       "family": "SHELL",
       "description": "Posturado e calmo. Ninguém passa por ele sem permissão, mas não tem força pra contra-atacar.",
       "penalty": "-30%",
-      "image_url": "/images/strains/Northern Lights.png"
+      "image_url": "/images/strains/Northern%20Lights.png"
     },
     {
       "slug": "24k-gold",
@@ -241,7 +241,7 @@
       "family": "PSYCHO",
       "description": "Larica dourada. Morde com estilo e drena energia vital, mas gasta recurso pra manter o brilho.",
       "penalty": "+1 Mana",
-      "image_url": "/images/strains/24K Gold.png"
+      "image_url": "/images/strains/24K%20Gold.png"
     },
     {
       "slug": "super-lemon",
@@ -250,7 +250,7 @@
       "family": "NEURO",
       "description": "Disposição cítrica e letal. Pilhado ao extremo, foca só em matar. Rápido, mas frágil.",
       "penalty": "-20%",
-      "image_url": "/images/strains/Super Lemon.png"
+      "image_url": "/images/strains/Super%20Lemon.png"
     },
     {
       "slug": "bubba-kush",
@@ -259,7 +259,7 @@
       "family": "SHELL",
       "description": "Postura de respeito absoluto. Firme como âncora, ninguém passa. Mas não ataca de volta.",
       "penalty": "-20%",
-      "image_url": "/images/strains/Bubba Kush.png"
+      "image_url": "/images/strains/Bubba%20Kush.png"
     },
     {
       "slug": "gelato-33",
@@ -268,7 +268,7 @@
       "family": "PSYCHO",
       "description": "A broca é sinistra. Morde o inimigo pra curar o mestre, mas perde um pouco de vida no processo.",
       "penalty": "-10% HP",
-      "image_url": "/images/strains/Gelato #33.png"
+      "image_url": "/images/strains/Gelato%20%2333.png"
     },
     {
       "slug": "jack-herer-ai",
@@ -277,7 +277,7 @@
       "family": "NEURO",
       "description": "Disposição filosófica. Pilhado com sabedoria, ataca com precisão cirúrgica. Quase perfeito.",
       "penalty": "-10%",
-      "image_url": "/images/strains/Jack Herer.AI.png"
+      "image_url": "/images/strains/Jack%20Herer.AI.png"
     },
     {
       "slug": "gdp",
