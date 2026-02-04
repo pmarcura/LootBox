@@ -136,7 +136,7 @@ export function CoopRunClient() {
   const wave = runState ? WAVES[runState.waveIndex] : null;
   return (
     <div className="relative flex flex-col">
-      {wave && (
+      {wave && runState && (
         <div className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/95 px-3 py-2 text-center backdrop-blur-sm">
           <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
             Wave {runState.waveIndex + 1} — {wave.label}
