@@ -745,10 +745,12 @@ export function pass(state: MatchState): PassResult {
   const isCoop = state.coop != null;
 
   if (isCoop && currentAction === "player1") {
+    const coop = state.coop;
+    if (!coop) return { ok: false, error: "invalid_phase" };
     const allyIndex = state.currentAllyIndex ?? 0;
     const passedAlly: [boolean, boolean] = [
-      allyIndex === 0 ? true : state.coop.passedThisRound[0],
-      allyIndex === 1 ? true : state.coop.passedThisRound[1],
+      allyIndex === 0 ? true : coop.passedThisRound[0],
+      allyIndex === 1 ? true : coop.passedThisRound[1],
     ];
     const bothPassed = passedAlly[0] && passedAlly[1];
     if (bothPassed) {

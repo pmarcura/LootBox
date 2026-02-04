@@ -1,1 +1,21 @@
-2026/02/04 01:43:20 Access token not provided. Supply an access token by running supabase login or setting the SUPABASE_ACCESS_TOKEN environment variable.
+/**
+ * Supabase generated types. Regenerate with:
+ *   supabase login && supabase link --project-ref YOUR_REF
+ *   npm run supabase:types
+ */
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export interface Database {
+  public: {
+    Tables: Record<string, unknown>;
+    Views: Record<string, unknown>;
+    Functions: Record<string, unknown>;
+    Enums: Record<string, unknown>;
+  };
+}
