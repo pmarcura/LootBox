@@ -3,6 +3,8 @@
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
 import { useBattleStore } from "../stores/battleStore";
+import { getSlotCount, simulateCombatPreview } from "../lib/game-engine";
+import type { SlotIndex } from "../lib/types";
 
 function NutrientSlot({ filled, available }: { filled: boolean; available: boolean }) {
   return (
@@ -28,6 +30,7 @@ type CombatHUDProps = {
 export function CombatHUD({ onBack }: CombatHUDProps) {
   const matchState = useBattleStore((s) => s.matchState);
   const mode = useBattleStore((s) => s.mode);
+  const myAllyIndex = useBattleStore((s) => s.myAllyIndex);
   const playTarget = useBattleStore((s) => s.playTarget);
   const combatEvents = useBattleStore((s) => s.combatEvents);
   const error = useBattleStore((s) => s.error);
@@ -40,14 +43,41 @@ export function CombatHUD({ onBack }: CombatHUDProps) {
   const buyCard = useBattleStore((s) => s.buyCard);
   const clearError = useBattleStore((s) => s.clearError);
 
+  const phase = matchState?.phase ?? "actions";
+  const attackPreviewSummary = React.useMemo(() => {
+    if (!matchState || (phase !== "defender_reaction" && phase !== "attack_declared")) return null;
+    const previews = simulateCombatPreview(matchState);
+    let totalFace = 0;
+    let totalToUnits = 0;
+    for (const p of previews) {
+      totalFace += p.faceDmg;
+      if (p.defenderId != null) totalToUnits += p.defenderHpBefore - p.defenderHpAfter;
+    }
+    return { totalFace, totalToUnits };
+  }, [matchState, phase]);
+
+  const confirmCombatRef = React.useRef<HTMLButtonElement>(null);
+  const myRoleForA11y = matchState ? (mode === "vs-amigo" ? matchState.currentTurn : "player1") : "player1";
+  const currentActionForA11y = matchState?.currentAction ?? matchState?.currentTurn ?? "player1";
+  const iAmDefenderForFocus = !!(matchState && (phase === "defender_reaction" || phase === "attack_declared") && currentActionForA11y === myRoleForA11y);
+  React.useEffect(() => {
+    if (iAmDefenderForFocus && confirmCombatRef.current) {
+      confirmCombatRef.current.focus({ preventScroll: true });
+    }
+  }, [iAmDefenderForFocus]);
+
   if (!matchState) return null;
 
   const myRole: "player1" | "player2" =
-    mode === "vs-amigo" ? matchState.currentTurn : ("player1" as const);
+    mode === "coop" ? "player1" : mode === "vs-amigo" ? matchState.currentTurn : ("player1" as const);
   const currentAction = matchState.currentAction ?? matchState.currentTurn;
-  const phase = matchState.phase ?? "actions";
   const attackToken = matchState.attackToken ?? matchState.currentTurn;
-  const isMyTurn = currentAction === myRole && matchState.status === "active";
+  const slotCount = getSlotCount(matchState);
+  const isMyTurn =
+    matchState.status === "active" &&
+    (mode === "coop"
+      ? currentAction === "player1" && (matchState.currentAllyIndex ?? 0) === myAllyIndex
+      : currentAction === myRole);
   const isDefenderReaction = phase === "defender_reaction" || phase === "attack_declared";
   const iAmDefender = isDefenderReaction && currentAction === myRole;
   const iHaveAttackToken = attackToken === myRole;
@@ -65,7 +95,25 @@ export function CombatHUD({ onBack }: CombatHUDProps) {
     myDeckCount === 0 &&
     myDiscardCount > 0;
 
-  const oppLabel = mode === "vs-ia" ? "IA" : "Oponente";
+  const myBoardCount = matchState.cards.filter(
+    (c) => c.owner === myRole && c.position === "board"
+  ).length;
+  const myHand = matchState.cards.filter(
+    (c) => c.owner === myRole && c.position === "hand"
+  );
+  const hasEmptySlot = myBoardCount < slotCount;
+  const canPlayAnyCard =
+    isMyTurn &&
+    myHand.some((c) => c.mana_cost <= myMana) &&
+    hasEmptySlot;
+  const canDeclareAttack = iHaveAttackToken && myBoardCount > 0;
+  const hasNoActions =
+    isMyTurn &&
+    !canPlayAnyCard &&
+    !canBuy &&
+    !canDeclareAttack;
+
+  const oppLabel = mode === "coop" ? "Inimigo" : mode === "vs-ia" ? "IA" : "Oponente";
   const phaseLabel =
     combatEvents !== null
       ? "Resolvendo combate"
@@ -77,7 +125,9 @@ export function CombatHUD({ onBack }: CombatHUDProps) {
             ? "Reação do defensor"
             : isMyTurn
               ? "Sua vez · Jogar ou passar"
-              : `Turno do ${oppLabel}`;
+              : mode === "coop" && currentAction === "player1"
+                ? `Vez do Jogador ${(matchState.currentAllyIndex ?? 0) + 1}`
+                : `Turno do ${oppLabel}`;
 
   return (
     <>
@@ -85,7 +135,12 @@ export function CombatHUD({ onBack }: CombatHUDProps) {
         className="sticky top-0 z-40 flex flex-col gap-1 border-b border-zinc-800 bg-zinc-950/95 px-3 py-2 backdrop-blur-sm"
         data-testid="playground-turn-indicator"
       >
-        <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+        <p
+          className="text-[10px] font-medium uppercase tracking-wider text-zinc-500"
+          aria-live="polite"
+          aria-atomic
+          role="status"
+        >
           {phaseLabel}
         </p>
         <div className="flex flex-wrap items-center gap-2">
@@ -114,7 +169,7 @@ export function CombatHUD({ onBack }: CombatHUDProps) {
             <div
               className="flex items-center gap-2"
               data-testid="playground-mana"
-              title="Passe ambos para subir rodada e ganhar mais mana"
+              title={`Passe ambos para subir rodada e ganhar mais mana. Rodada ${matchState.roundNumber ?? 1} — próxima: +1 mana até ${maxMana}.`}
             >
               <span className="text-[9px] font-semibold uppercase tracking-wider text-emerald-600/80">
                 Banco de Mana
@@ -155,10 +210,22 @@ export function CombatHUD({ onBack }: CombatHUDProps) {
                 Cancelar
               </Button>
             )}
+            {attackPreviewSummary && (attackPreviewSummary.totalFace > 0 || attackPreviewSummary.totalToUnits > 0) && (
+              <span className="text-[10px] text-amber-200/90">
+                {attackPreviewSummary.totalFace > 0 && (
+                  <span className="tabular-nums">{attackPreviewSummary.totalFace} ao face</span>
+                )}
+                {attackPreviewSummary.totalFace > 0 && attackPreviewSummary.totalToUnits > 0 && " · "}
+                {attackPreviewSummary.totalToUnits > 0 && (
+                  <span className="tabular-nums">{attackPreviewSummary.totalToUnits} a unidades</span>
+                )}
+              </span>
+            )}
             {!playTarget && (
               <>
                 {iAmDefender ? (
                   <Button
+                    ref={confirmCombatRef}
                     variant="primary"
                     size="sm"
                     onClick={defenderReactionPass}
@@ -170,26 +237,33 @@ export function CombatHUD({ onBack }: CombatHUDProps) {
                   <>
                     {isMyTurn && (
                       <>
+                        {hasNoActions && (
+                          <span className="text-[10px] text-zinc-500">
+                            Nenhuma jogada possível — passe para avançar
+                          </span>
+                        )}
                         <Button
-                          variant="secondary"
+                          variant={hasNoActions ? "primary" : "secondary"}
                           size="sm"
                           onClick={pass}
                           data-testid="playground-pass"
+                          className={hasNoActions ? "ring-2 ring-amber-400" : undefined}
                         >
                           Passar
                         </Button>
-                        {iHaveAttackToken && (
+                        {canDeclareAttack && (
                           <Button
                             variant="primary"
                             size="sm"
                             onClick={() => {
-                              const slots = ([1, 2, 3] as const).filter((s) =>
-                                matchState.cards.some(
-                                  (c) =>
-                                    c.owner === myRole &&
-                                    c.position === "board" &&
-                                    c.slot_index === s
-                                )
+                              const slots = (Array.from({ length: slotCount }, (_, i) => (i + 1) as SlotIndex)).filter(
+                                (s) =>
+                                  matchState.cards.some(
+                                    (c) =>
+                                      c.owner === myRole &&
+                                      c.position === "board" &&
+                                      c.slot_index === s
+                                  )
                               );
                               if (slots.length > 0) declareAttack(slots);
                             }}

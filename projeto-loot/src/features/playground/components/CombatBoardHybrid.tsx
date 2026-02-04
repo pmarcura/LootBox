@@ -13,9 +13,11 @@ import {
   getDeckCount,
   getDiscardCount,
   getHand,
+  getSlotCount,
   playCard,
+  simulateCombatPreview,
 } from "../lib/game-engine";
-import { executeAIMove } from "../lib/ai-opponent";
+import { executeAIMove, executeAllyBotMove } from "../lib/ai-opponent";
 import { useBattleStore } from "../stores/battleStore";
 import { CombatHUD } from "./CombatHUD";
 import { CombatOverlay, type CardSlotMap } from "@/features/duels/components/CombatOverlay";
@@ -26,8 +28,10 @@ import { AttackTokenIndicator } from "./AttackTokenIndicator";
 import { KeywordIcon } from "./KeywordIcons";
 import { CombatPreviewOverlay, useCombatPreview } from "./CombatPreviewOverlay";
 import { EngagementLines } from "./EngagementLines";
+import { CombatHistoryLog } from "./CombatHistoryLog";
 import { Skull } from "lucide-react";
 import type { CardInMatch, MatchState } from "../lib/types";
+import type { SlotIndex } from "../lib/types";
 
 const PixiEffectsLayer = dynamic(
   () =>
@@ -44,6 +48,7 @@ function SlotCard({
   isSpawning,
   testId,
   combatPreview,
+  displayHp,
 }: {
   card: CardInMatch | null;
   keyword: string;
@@ -53,6 +58,8 @@ function SlotCard({
   isSpawning?: boolean;
   testId: string;
   combatPreview?: { hpAfter: number; dies: boolean };
+  /** HP em tempo real durante animação de combate (sobrescreve card.current_hp) */
+  displayHp?: number;
 }) {
   if (!card)
     return (
@@ -89,11 +96,13 @@ function SlotCard({
           ) : (
             <HeartIcon size={12} className="text-red-400/90" />
           )}
-          {combatPreview != null
-            ? combatPreview.dies
-              ? "0"
-              : combatPreview.hpAfter
-            : card.current_hp ?? card.final_hp}
+          {displayHp != null
+            ? displayHp
+            : combatPreview != null
+              ? combatPreview.dies
+                ? 0
+                : combatPreview.hpAfter
+              : card.current_hp ?? card.final_hp}
         </span>
         <span className="inline-flex items-center gap-1 text-zinc-300">
           <AttackIcon size={12} className="text-amber-400/90" />
@@ -164,8 +173,8 @@ function HandCard({
   playable: boolean;
   selected: boolean;
   setPlayTarget: (id: string | null) => void;
-  handlePlayCard: (id: string, slot: 1 | 2 | 3) => void;
-  getSlotFromPoint: (x: number, y: number) => 1 | 2 | 3 | null;
+  handlePlayCard: (id: string, slot: SlotIndex) => void;
+  getSlotFromPoint: (x: number, y: number) => SlotIndex | null;
   loading: string | null;
   onCardLongPress?: (card: CardInMatch) => void;
   testId: string;
@@ -256,6 +265,8 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
   const combatEvents = useBattleStore((s) => s.combatEvents);
   const pendingStateAfterCombat = useBattleStore((s) => s.pendingStateAfterCombat);
   const turnTransition = useBattleStore((s) => s.turnTransition);
+  const roundAdvanceMessage = useBattleStore((s) => s.roundAdvanceMessage);
+  const combatHistory = useBattleStore((s) => s.combatHistory);
   const zoomedCard = useBattleStore((s) => s.zoomedCard);
   const lastPlayed = useBattleStore((s) => s.lastPlayed);
   const setZoomedCard = useBattleStore((s) => s.setZoomedCard);
@@ -265,33 +276,48 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
   const completeCombat = useBattleStore((s) => s.completeCombat);
   const setCombatFromAI = useBattleStore((s) => s.setCombatFromAI);
   const setActiveCombatLane = useBattleStore((s) => s.setActiveCombatLane);
+  const setRoundAdvanceMessage = useBattleStore((s) => s.setRoundAdvanceMessage);
   const activeCombatLane = useBattleStore((s) => s.activeCombatLane);
+
+  React.useEffect(() => {
+    if (combatEvents?.length) setCombatEventIndex(0);
+  }, [combatEvents?.length]);
+
+  // Limpar toast de rodada após 2.5s
+  React.useEffect(() => {
+    if (!roundAdvanceMessage) return;
+    const t = setTimeout(() => setRoundAdvanceMessage(null), 2500);
+    return () => clearTimeout(t);
+  }, [roundAdvanceMessage, setRoundAdvanceMessage]);
   const shakeTriggerRef = React.useRef<((intensity?: "light" | "medium" | "heavy") => void) | null>(null);
 
   const [loading, setLoading] = React.useState<string | null>(null);
+  const [combatEventIndex, setCombatEventIndex] = React.useState(0);
 
-  const slot1Ref = React.useRef<HTMLDivElement>(null);
-  const slot2Ref = React.useRef<HTMLDivElement>(null);
-  const slot3Ref = React.useRef<HTMLDivElement>(null);
+  const slotRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const slotCount = matchState ? getSlotCount(matchState) : 3;
+  const runState = useBattleStore((s) => s.runState);
 
-  const getSlotFromPoint = React.useCallback((clientX: number, clientY: number): 1 | 2 | 3 | null => {
-    const refs = [slot1Ref, slot2Ref, slot3Ref] as const;
-    for (let i = 0; i < 3; i++) {
-      const el = refs[i].current;
-      if (!el) continue;
-      const rect = el.getBoundingClientRect();
-      if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
-        return (i + 1) as 1 | 2 | 3;
+  const getSlotFromPoint = React.useCallback(
+    (clientX: number, clientY: number): SlotIndex | null => {
+      for (let i = 0; i < slotCount; i++) {
+        const el = slotRefs.current[i];
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+          return (i + 1) as SlotIndex;
+        }
       }
-    }
-    return null;
-  }, []);
+      return null;
+    },
+    [slotCount]
+  );
 
   const defenderReactionPass = useBattleStore((s) => s.defenderReactionPass);
 
-  // AI turn
+  // AI turn (vs-ia: opponent; coop: enemy player2)
   React.useEffect(() => {
-    if (mode !== "vs-ia" || !matchState || matchState.status !== "active" || combatEvents != null)
+    if ((mode !== "vs-ia" && mode !== "coop") || !matchState || matchState.status !== "active" || combatEvents != null)
       return;
 
     const currentAction = matchState.currentAction ?? matchState.currentTurn;
@@ -310,7 +336,8 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
     if (currentAction !== "player2") return;
 
     const timer = setTimeout(() => {
-      let result = executeAIMove(matchState);
+      const difficulty = useBattleStore.getState().aiDifficulty;
+      let result = executeAIMove(matchState, { difficulty });
       while (result && result.state.status === "active") {
         const nextAction = result.state.currentAction ?? result.state.currentTurn;
         if (nextAction !== "player2") break;
@@ -318,25 +345,86 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
           setCombatFromAI(result.events, result.stateBeforeCombat, result.state);
           return;
         }
-        result = executeAIMove(result.state);
+        result = executeAIMove(result.state, { difficulty });
       }
       if (result?.events.length && result.stateBeforeCombat) {
         setCombatFromAI(result.events, result.stateBeforeCombat, result.state);
       } else if (result) {
+        const prevRound = matchState.roundNumber ?? 1;
+        const nextRound = result.state.roundNumber ?? 1;
+        if (nextRound > prevRound) {
+          const maxMana = result.state.config?.maxMana ?? 10;
+          const nextMana = Math.min(maxMana, nextRound);
+          setRoundAdvanceMessage(`Rodada ${nextRound} — +1 mana (${nextMana}/${maxMana})`);
+        }
         setMatchState(result.state);
       }
     }, 800);
     return () => clearTimeout(timer);
-  }, [mode, matchState, combatEvents, setCombatFromAI, setMatchState, defenderReactionPass]);
+  }, [mode, matchState, combatEvents, setCombatFromAI, setMatchState, setRoundAdvanceMessage, defenderReactionPass]);
+
+  // Coop ally bot turn (player1, ally index 1)
+  React.useEffect(() => {
+    if (
+      mode !== "coop" ||
+      !runState?.filledWithBot ||
+      !matchState ||
+      matchState.status !== "active" ||
+      combatEvents != null
+    )
+      return;
+
+    const currentAction = matchState.currentAction ?? matchState.currentTurn;
+    const phase = matchState.phase ?? "actions";
+    const currentAllyIndex = matchState.currentAllyIndex ?? 0;
+
+    if (phase === "defender_reaction" || phase === "attack_declared") {
+      if (currentAction === "player2") {
+        const timer = setTimeout(() => defenderReactionPass(), 600);
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+
+    if (currentAction !== "player1" || currentAllyIndex !== 1) return;
+
+    const timer = setTimeout(() => {
+      let result = executeAllyBotMove(matchState, 1);
+      while (result && result.state.status === "active") {
+        const nextAction = result.state.currentAction ?? result.state.currentTurn;
+        const nextAlly = result.state.currentAllyIndex ?? 0;
+        if (nextAction !== "player1" || nextAlly !== 1) break;
+        if (result.events.length > 0 && result.stateBeforeCombat) {
+          setCombatFromAI(result.events, result.stateBeforeCombat, result.state);
+          return;
+        }
+        result = executeAllyBotMove(result.state, 1);
+      }
+      if (result?.events.length && result.stateBeforeCombat) {
+        setCombatFromAI(result.events, result.stateBeforeCombat, result.state);
+      } else if (result) {
+        const prevRound = matchState.roundNumber ?? 1;
+        const nextRound = result.state.roundNumber ?? 1;
+        if (nextRound > prevRound) {
+          const maxMana = result.state.config?.maxMana ?? 10;
+          const nextMana = Math.min(maxMana, nextRound);
+          setRoundAdvanceMessage(`Rodada ${nextRound} — +1 mana (${nextMana}/${maxMana})`);
+        }
+        setMatchState(result.state);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [mode, runState?.filledWithBot, matchState, combatEvents, setCombatFromAI, setMatchState, setRoundAdvanceMessage, defenderReactionPass]);
 
   const phase = matchState?.phase ?? "actions";
 
   const cardSlotMap: CardSlotMap = React.useMemo(() => {
     if (!matchState) return {};
+    const n = getSlotCount(matchState);
     const map: CardSlotMap = {};
     for (const c of matchState.cards) {
       if (c.position !== "board" || !c.slot_index) continue;
-      const lane = c.slot_index >= 1 && c.slot_index <= 3 ? c.slot_index : 1;
+      const lane = c.slot_index >= 1 && c.slot_index <= n ? c.slot_index : 1;
       map[c.match_card_id] = { owner: c.owner, lane };
     }
     return map;
@@ -355,10 +443,48 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
     return m;
   }, [matchState]);
 
+  /** HP em tempo real durante animação de combate (atualiza conforme eventos de dano/morte) */
+  const liveHpMap = React.useMemo(() => {
+    if (!matchState || !combatEvents || combatEvents.length === 0) return {};
+    const hp: Record<string, number> = {};
+    for (const c of matchState.cards) {
+      if (c.position === "board" && c.slot_index != null) {
+        hp[c.match_card_id] = c.current_hp ?? c.final_hp;
+      }
+    }
+    for (let i = 0; i <= combatEventIndex && i < combatEvents.length; i++) {
+      const ev = combatEvents[i];
+      if (!ev) continue;
+      if (ev.t === "damage") {
+        const cur = hp[ev.target_id] ?? cardsLookup[ev.target_id]?.final_hp ?? 0;
+        hp[ev.target_id] = Math.max(0, cur - ev.amount);
+      } else if (ev.t === "death") {
+        hp[ev.card_id] = 0;
+      }
+    }
+    return hp;
+  }, [matchState, combatEvents, combatEventIndex, cardsLookup]);
+
   const combatPreviewMap = useCombatPreview(matchState, phase);
+  const slotPreviews =
+    phase === "defender_reaction" && matchState
+      ? simulateCombatPreview(matchState)
+      : [];
+  const [previewPopoverSlot, setPreviewPopoverSlot] = React.useState<SlotIndex | null>(null);
+
+  // Pré-carregar imagens das cartas quando o combate inicia para evitar piscar no overlay
+  React.useEffect(() => {
+    if (!combatEvents?.length || !matchState) return;
+    for (const c of matchState.cards) {
+      if (c.image_url) {
+        const img = new Image();
+        img.src = c.image_url;
+      }
+    }
+  }, [combatEvents?.length, matchState]);
 
   const handlePlayCard = React.useCallback(
-    (matchCardId: string, slot: 1 | 2 | 3) => {
+    (matchCardId: string, slot: SlotIndex) => {
       setLoading(matchCardId);
       setPlayTarget(null);
       playCardStore(matchCardId, slot);
@@ -374,6 +500,13 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
   const myRole = mode === "vs-amigo" ? matchState.currentTurn : ("player1" as const);
   const oppRole = myRole === "player1" ? "player2" : "player1";
   const currentAction = matchState.currentAction ?? matchState.currentTurn;
+  const myAllyIndex = useBattleStore((s) => s.myAllyIndex);
+  const isCoop = mode === "coop";
+  const isMyTurn =
+    matchState.status === "active" &&
+    (isCoop
+      ? currentAction === "player1" && (matchState.currentAllyIndex ?? 0) === myAllyIndex
+      : currentAction === myRole);
   const myHand = getHand(matchState, myRole);
   const myBoard = getBoard(matchState, myRole);
   const oppBoard = getBoard(matchState, oppRole);
@@ -381,17 +514,17 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
   const myMana = myRole === "player1" ? matchState.player1Mana : matchState.player2Mana;
   const myLife = myRole === "player1" ? matchState.player1Life : matchState.player2Life;
   const oppLife = myRole === "player1" ? matchState.player2Life : matchState.player1Life;
-  const isMyTurn = currentAction === myRole && matchState.status === "active";
 
-  const myBoardBySlot: (CardInMatch | null)[] = [null, null, null];
+  const slotCountState = getSlotCount(matchState);
+  const myBoardBySlot: (CardInMatch | null)[] = Array.from({ length: slotCountState }, () => null);
   for (const c of myBoard) {
     const s = c.slot_index ?? 1;
-    if (s >= 1 && s <= 3) myBoardBySlot[s - 1] = c;
+    if (s >= 1 && s <= slotCountState) myBoardBySlot[s - 1] = c;
   }
-  const oppBoardBySlot: (CardInMatch | null)[] = [null, null, null];
+  const oppBoardBySlot: (CardInMatch | null)[] = Array.from({ length: slotCountState }, () => null);
   for (const c of oppBoard) {
     const s = c.slot_index ?? 1;
-    if (s >= 1 && s <= 3) oppBoardBySlot[s - 1] = c;
+    if (s >= 1 && s <= slotCountState) oppBoardBySlot[s - 1] = c;
   }
 
   const attackerSide: "player1" | "player2" =
@@ -405,12 +538,12 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
 
   if (matchState.status === "finished") {
     const won = matchState.winner === "player1";
-    const oppLabel = mode === "vs-ia" ? "IA" : "Oponente";
+    const oppLabel = mode === "coop" ? "Inimigo" : mode === "vs-ia" ? "IA" : "Oponente";
     return (
       <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-6 px-4">
-        <p className="text-2xl font-bold">{won ? "Você venceu!" : `A ${oppLabel} venceu.`}</p>
+        <p className="text-2xl font-bold">{won ? (mode === "coop" ? "Wave vencida!" : "Você venceu!") : mode === "coop" ? "Fim da run." : `A ${oppLabel} venceu.`}</p>
         <Button variant="primary" onClick={onBack}>
-          Nova partida
+          {mode === "coop" ? "Continuar" : "Nova partida"}
         </Button>
       </div>
     );
@@ -432,12 +565,30 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
           myRole={myRole}
           usePixi={false}
           cardsLookup={cardsLookup}
-          onComplete={completeCombat}
+          onComplete={() => {
+            setCombatEventIndex(0);
+            completeCombat();
+          }}
+          onEventIndexChange={setCombatEventIndex}
           onEventFocus={(focus) => {
             const lane = focus?.attacker?.lane ?? focus?.defender?.lane ?? null;
             setActiveCombatLane(lane);
           }}
         />
+      )}
+
+      {roundAdvanceMessage && (
+        <motion.div
+          className="fixed left-1/2 top-24 z-[55] -translate-x-1/2 rounded-xl border border-emerald-500/50 bg-emerald-950/95 px-4 py-2.5 shadow-lg shadow-emerald-500/20"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+          role="status"
+          aria-live="polite"
+        >
+          <p className="text-sm font-bold text-emerald-200">{roundAdvanceMessage}</p>
+        </motion.div>
       )}
 
       {turnTransition && (
@@ -480,11 +631,53 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
       />
       <CombatPreviewOverlay matchState={matchState} phase={phase} />
 
+      {previewPopoverSlot != null && (() => {
+        const p = slotPreviews.find((x) => x.slot === previewPopoverSlot);
+        if (!p) return null;
+        return (
+          <div
+            className="fixed inset-0 z-[45] flex items-center justify-center bg-black/40 p-4"
+            onClick={() => setPreviewPopoverSlot(null)}
+            role="dialog"
+            aria-label="Resumo do combate na faixa"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-xl border border-amber-500/50 bg-zinc-900 px-4 py-3 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="text-xs font-bold uppercase text-amber-400">
+                Faixa {previewPopoverSlot} — prévia
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-zinc-200">
+                {p.defenderDies ? (
+                  <li>Defensor: morre</li>
+                ) : (
+                  <li>Defensor HP após: {p.defenderHpAfter}</li>
+                )}
+                {p.attackerDies && <li>Atacante: morre</li>}
+                {p.faceDmg > 0 && (
+                  <li>Dano ao jogador: {p.faceDmg}</li>
+                )}
+              </ul>
+              <button
+                type="button"
+                className="mt-3 w-full rounded-lg bg-zinc-700 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-600"
+                onClick={() => setPreviewPopoverSlot(null)}
+              >
+                Fechar
+              </button>
+            </motion.div>
+          </div>
+        );
+      })()}
+
       <div className="relative z-10 flex flex-1 flex-col overflow-auto px-2 pb-2">
         <section className="mt-2 rounded-2xl border border-violet-900/50 bg-zinc-900/80 p-3">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs uppercase tracking-wider text-zinc-500">
-              {mode === "vs-ia" ? "IA" : `Jogador 2${currentAction === "player2" ? " (sua vez)" : ""}`}
+              {mode === "coop" ? "Inimigo" : mode === "vs-ia" ? "IA" : `Jogador 2${currentAction === "player2" ? " (sua vez)" : ""}`}
             </p>
             <AnimatedLifeBar
               value={oppLife}
@@ -495,18 +688,18 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
             />
             <p className="tabular-nums text-sm text-zinc-400">Mão: {oppHandCount}</p>
           </div>
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            {[0, 1, 2].map((i) => {
-              const lane = i + 1;
+          <div className={`mt-2 grid gap-2 ${slotCountState === 5 ? "grid-cols-5" : "grid-cols-3"}`}>
+            {Array.from({ length: slotCountState }, (_, i) => {
+              const lane = (i + 1) as SlotIndex;
               const isActiveLane = activeCombatLane === lane;
               const attackSlots = matchState.declaredAttackSlots ?? [];
               const isAttackingSlot =
                 (phase === "defender_reaction" || phase === "attack_declared") &&
-                attackSlots.includes(lane as 1 | 2 | 3) &&
+                attackSlots.includes(lane) &&
                 matchState.attackToken === oppRole;
               const isDefendingSlot =
                 (phase === "defender_reaction" || phase === "attack_declared") &&
-                attackSlots.includes(lane as 1 | 2 | 3) &&
+                attackSlots.includes(lane) &&
                 matchState.attackToken !== oppRole;
               return (
               <motion.div
@@ -529,6 +722,7 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                       ? combatPreviewMap[oppBoardBySlot[i]!.match_card_id]
                       : undefined
                   }
+                  displayHp={oppBoardBySlot[i] && combatEvents ? liveHpMap[oppBoardBySlot[i]!.match_card_id] : undefined}
                   testId={`playground-slot-opp-${i + 1}`}
                 />
               </motion.div>
@@ -545,7 +739,11 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
         <section className="mt-3 rounded-2xl border border-amber-800/50 bg-amber-950/20 p-3">
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs uppercase tracking-wider text-zinc-500">
-              {mode === "vs-ia" ? "Seus slots" : `Jogador 1${currentAction === "player1" ? " (sua vez)" : ""}`}
+              {mode === "coop"
+                ? `Aliados${currentAction === "player1" ? ` · Vez do Jogador ${(matchState.currentAllyIndex ?? 0) + 1}` : ""}`
+                : mode === "vs-ia"
+                  ? "Seus slots"
+                  : `Jogador 1${currentAction === "player1" ? " (sua vez)" : ""}`}
             </p>
             <AnimatedLifeBar
               value={myLife}
@@ -556,12 +754,11 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
             />
           </div>
           <p className="mt-1 text-xs text-zinc-500">Clique na carta e depois no slot vazio, ou arraste.</p>
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            {[0, 1, 2].map((i) => {
-              const slot = (i + 1) as 1 | 2 | 3;
+          <div className={`mt-2 grid gap-2 ${slotCountState === 5 ? "grid-cols-5" : "grid-cols-3"}`}>
+            {Array.from({ length: slotCountState }, (_, i) => {
+              const slot = (i + 1) as SlotIndex;
               const isEmpty = !myBoardBySlot[i];
               const isTarget = selectingSlot && isEmpty;
-              const slotRef = i === 0 ? slot1Ref : i === 1 ? slot2Ref : slot3Ref;
               const isActiveLane = activeCombatLane === slot;
               const attackSlots = matchState.declaredAttackSlots ?? [];
               const isAttackingSlot =
@@ -572,10 +769,13 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                 (phase === "defender_reaction" || phase === "attack_declared") &&
                 attackSlots.includes(slot) &&
                 matchState.attackToken !== myRole;
+              const showPreviewOnTap = isDefendingSlot && slotPreviews.some((x) => x.slot === slot);
               return (
                 <div
                   key={i}
-                  ref={slotRef}
+                  ref={(el) => {
+                    slotRefs.current[i] = el;
+                  }}
                   data-combat-slot={`${myRole}-${slot}`}
                   className={isActiveLane ? "rounded-xl ring-2 ring-amber-400 ring-offset-2 ring-offset-zinc-900 transition-all" : ""}
                 >
@@ -587,6 +787,11 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                           ? { scale: [1, 1.02], transition: { duration: 0.2 } }
                           : undefined
                     }
+                    role={showPreviewOnTap ? "button" : undefined}
+                    tabIndex={showPreviewOnTap ? 0 : undefined}
+                    onClick={showPreviewOnTap ? () => setPreviewPopoverSlot(slot) : undefined}
+                    onKeyDown={showPreviewOnTap ? (e) => e.key === "Enter" && setPreviewPopoverSlot(slot) : undefined}
+                    aria-label={showPreviewOnTap ? `Ver prévia do combate na faixa ${slot}` : undefined}
                   >
                   <SlotCard
                     card={myBoardBySlot[i]}
@@ -596,6 +801,7 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                         ? combatPreviewMap[myBoardBySlot[i]!.match_card_id]
                         : undefined
                     }
+                    displayHp={myBoardBySlot[i] && combatEvents ? liveHpMap[myBoardBySlot[i]!.match_card_id] : undefined}
                     slotNumber={slot}
                     isTarget={isTarget}
                     onClick={isTarget && playTarget ? () => handlePlayCard(playTarget, slot) : undefined}
@@ -609,10 +815,13 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
           </div>
         </section>
 
-        <div className="mt-3 flex justify-center">
-          <Button variant="ghost" size="sm" onClick={onBack} data-testid="playground-back">
-            Sair da partida
-          </Button>
+        <div className="mt-3 space-y-3">
+          <CombatHistoryLog history={combatHistory} maxCombats={5} />
+          <div className="flex justify-center">
+            <Button variant="ghost" size="sm" onClick={onBack} data-testid="playground-back">
+              Sair da partida
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -629,7 +838,7 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
             phase === "actions" &&
             myMana >= c.mana_cost &&
             !loading &&
-            myBoard.length < 3;
+            myBoard.length < slotCountState;
             const selected = playTarget === c.match_card_id;
             return (
               <HandCard

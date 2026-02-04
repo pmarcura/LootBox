@@ -7,6 +7,12 @@ export type MatchPlayer = "player1" | "player2";
 export type CardPosition = "deck" | "hand" | "board" | "discard";
 export type MatchStatus = "active" | "finished";
 
+/** Slot index (1-based). Use SLOTS_3 or SLOTS_5 for iteration. */
+export type SlotIndex = 1 | 2 | 3 | 4 | 5;
+
+export const SLOTS_3 = [1, 2, 3] as const;
+export const SLOTS_5 = [1, 2, 3, 4, 5] as const;
+
 /** Eventos de combate para animações e log */
 export type CombatEvent =
   | { t: "attack"; lane: number; attacker_id: string; defender_id: string }
@@ -42,6 +48,16 @@ export type GameConfig = {
   startingLife: number;
   maxMana: number;
   manaPerTurn: number; // legacy; used as round 1 mana
+  /** Number of board slots per side (default 3). Coop uses 5. */
+  slotCount?: 3 | 5;
+  /** Initial draw per side (default 3). Coop uses 4. */
+  initialDraw?: number;
+  /** Max hand size; discard excess when drawing (optional). Coop uses 8. */
+  maxHandSize?: number;
+  /** Enemy (player2) starting life when different from startingLife (e.g. coop waves). */
+  player2StartingLife?: number;
+  /** Ally (player1) initial life when different from startingLife (e.g. nexus_shield + carry-over). */
+  player1StartingLife?: number;
 };
 
 /** Phase do jogo (action-based) */
@@ -75,7 +91,15 @@ export type MatchState = {
   /** Quem passou nesta rodada */
   passedThisRound: { player1: boolean; player2: boolean };
   /** Slots que o atacante escolheu atacar (após declareAttack) */
-  declaredAttackSlots?: (1 | 2 | 3)[];
+  declaredAttackSlots?: SlotIndex[];
+  /** Number of board slots (from config; default 3). */
+  slotCount?: 3 | 5;
+  /** Coop only: who has the turn within the ally team (0 or 1). */
+  currentAllyIndex?: 0 | 1;
+  /** Coop only: which allies have passed this round. */
+  coop?: {
+    passedThisRound: [boolean, boolean];
+  };
 };
 
 /** Log event for match history */

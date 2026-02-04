@@ -71,29 +71,28 @@ describe("game-engine", () => {
     });
 
     it("returns error when slot occupied", () => {
-      const cheap = [
-        { id: "c1", final_hp: 2, final_atk: 1, mana_cost: 1, keyword: "" },
-        { id: "c2", final_hp: 2, final_atk: 1, mana_cost: 1, keyword: "" },
-        { id: "c3", final_hp: 2, final_atk: 1, mana_cost: 1, keyword: "" },
-        { id: "c4", final_hp: 2, final_atk: 1, mana_cost: 1, keyword: "" },
-        { id: "c5", final_hp: 2, final_atk: 1, mana_cost: 1, keyword: "" },
-      ].map((c, i) => ({ ...c, id: `${c.id}-${i}` }));
-      const p1 = cheap;
+      const p1 = createDeterministicDeck(PRESET_BALANCED);
       const p2 = createDeterministicDeck(PRESET_BALANCED);
-      let state = createMatch(p1, p2, { manaPerTurn: 2, maxMana: 10 });
+      const state = createMatch(p1, p2, { maxMana: 10 });
       const hand = getHand(state, "player1");
       const card1 = hand[0]!;
       const result1 = playCard(state, card1.match_card_id, 1);
       expect(result1.ok).toBe(true);
       if (!result1.ok) return;
-      state = result1.state;
-      const passResult = pass(state);
-      expect(passResult.ok).toBe(true);
-      if (!passResult.ok) return;
-      state = passResult.state;
-      const hand2 = getHand(state, "player1");
-      const card2 = hand2[0]!;
-      const result2 = playCard(state, card2.match_card_id, 1);
+      const stateAfterPlay = result1.state;
+      const handAfter = getHand(stateAfterPlay, "player1");
+      const cardInHand = handAfter.find((c) => c.position === "hand");
+      expect(cardInHand).toBeDefined();
+      const result2 = playCard(
+        {
+          ...stateAfterPlay,
+          currentAction: "player1",
+          currentTurn: "player1",
+          player1Mana: 10,
+        },
+        cardInHand!.match_card_id,
+        1,
+      );
       expect(result2.ok).toBe(false);
       if (result2.ok) return;
       expect(result2.error).toBe("slot_occupied");

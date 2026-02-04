@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 type EngagementLinesProps = {
   phase: string;
-  declaredAttackSlots: (1 | 2 | 3)[] | undefined;
+  declaredAttackSlots: (1 | 2 | 3 | 4 | 5)[] | undefined;
   attackerSide: "player1" | "player2";
   defenderSide: "player1" | "player2";
 };

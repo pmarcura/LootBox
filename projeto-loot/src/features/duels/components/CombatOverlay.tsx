@@ -151,6 +151,8 @@ type OverlayProps = {
   cardSlotMap: CardSlotMap;
   onComplete: () => void;
   onEventFocus?: (focus: CombatFocus | null) => void;
+  /** Chamado quando o índice do evento atual muda (para atualizar HP em tempo real) */
+  onEventIndexChange?: (index: number) => void;
   usePixi?: boolean;
   myRole?: "player1" | "player2";
   /** Lookup de cartas para labels ricos (atacante X ATK → defensor Y HP) */
@@ -163,6 +165,7 @@ export function CombatOverlay({
   cardSlotMap,
   onComplete,
   onEventFocus,
+  onEventIndexChange,
   usePixi = true,
   myRole = "player1",
   cardsLookup,
@@ -205,6 +208,15 @@ export function CombatOverlay({
     onEventFocusRef.current = onEventFocus;
   }, [onEventFocus]);
 
+  const onEventIndexChangeRef = React.useRef(onEventIndexChange);
+  React.useEffect(() => {
+    onEventIndexChangeRef.current = onEventIndexChange;
+  }, [onEventIndexChange]);
+
+  React.useEffect(() => {
+    onEventIndexChangeRef.current?.(index);
+  }, [index]);
+
   React.useEffect(() => {
     if (events.length === 0) {
       onCompleteRef.current();
@@ -232,6 +244,20 @@ export function CombatOverlay({
       setIndex(events.length);
     }
   }, [speed, events.length]);
+
+  const laneOrder = React.useMemo(() => {
+    const seen = new Set<number>();
+    const order: number[] = [];
+    for (const e of events) {
+      const lane = "lane" in e ? e.lane : null;
+      if (lane != null && !seen.has(lane)) {
+        seen.add(lane);
+        order.push(lane);
+      }
+    }
+    if (order.length === 0) return [1, 2, 3];
+    return order.sort((a, b) => a - b);
+  }, [events]);
 
   if (events.length === 0) return null;
 
@@ -274,16 +300,18 @@ export function CombatOverlay({
         return `${slot(event)}: Morte${c != null ? ` (${c}❤)` : ""}`;
       }
       case "face":
-        return `Face: -${event.amount}`;
+        return `Dano ao jogador: -${event.amount}`;
       case "redirect": {
         const a = atk(event.attacker_id), b = hp(event.blocker_id);
         const stats = a != null && b != null ? ` (${a}⚔ bloqueado por ${b}❤)` : "";
-        return `${slot(event)}: Bloqueio${stats}`;
+        return `${slot(event)}: Bloqueio (escudo)${stats}`;
       }
       default:
         return "";
     }
   })();
+
+  const currentLane = "lane" in event ? event.lane : null;
 
   return (
     <CombatOverlayErrorBoundary onSkip={onComplete}>
@@ -295,6 +323,16 @@ export function CombatOverlay({
         aria-label="Animação de combate"
       >
         <div className="pointer-events-none flex flex-1 flex-col items-center">
+        <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+          Ordem: {laneOrder.map((lane) => (
+            <span key={lane}>
+              <span className={currentLane === lane ? "font-bold text-amber-400" : ""}>
+                Faixa {lane}
+              </span>
+              {lane !== laneOrder[laneOrder.length - 1] && " → "}
+            </span>
+          ))}
+        </p>
         {eventLabel && (
           <motion.p
             key={index}
@@ -730,7 +768,7 @@ function FloatingNumber({
         }}
         initial={{ opacity: 1, x: "-50%", y: "-50%", scale: 1.2 }}
         animate={{ opacity: 0, x: "-50%", y: "calc(-50% - 40px)", scale: 1.5 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       >
         {type === "heal" ? (
           <HeartIcon size={22} className="opacity-90" />

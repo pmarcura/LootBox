@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { PRESET_DECKS, type PresetDeckKey } from "../lib/preset-decks";
-import type { BattleMode } from "../stores/battleStore";
+import { useBattleStore, type BattleMode, type AIDifficulty } from "../stores/battleStore";
 import type { GameConfig, PlaygroundCard } from "../lib/types";
 
 type PlaygroundSetupProps = {
@@ -21,11 +22,19 @@ const DEFAULT_CONFIG: GameConfig = {
   manaPerTurn: 1,
 };
 
+const DIFFICULTY_OPTIONS: { value: AIDifficulty; label: string }[] = [
+  { value: "easy", label: "Fácil" },
+  { value: "normal", label: "Normal" },
+  { value: "hard", label: "Difícil" },
+];
+
 export function PlaygroundSetup({ onStart }: PlaygroundSetupProps) {
   const [playerPreset, setPlayerPreset] = React.useState<PresetDeckKey>("balanced");
   const [aiPreset, setAiPreset] = React.useState<PresetDeckKey>("balanced");
   const [config, setConfig] = React.useState<GameConfig>(DEFAULT_CONFIG);
   const [mode, setMode] = React.useState<BattleMode>("vs-ia");
+  const aiDifficulty = useBattleStore((s) => s.aiDifficulty);
+  const setAIDifficulty = useBattleStore((s) => s.setAIDifficulty);
 
   const handleStart = () => {
     const playerDeck = [...PRESET_DECKS[playerPreset]];
@@ -59,7 +68,28 @@ export function PlaygroundSetup({ onStart }: PlaygroundSetupProps) {
           >
             vs Amigo
           </Button>
+          <Button variant="secondary" size="sm" asChild>
+            <Link href="/coop">Coop Boss</Link>
+          </Button>
         </div>
+        {mode === "vs-ia" && (
+          <div className="mt-3 space-y-2">
+            <p className="text-xs text-zinc-500">Dificuldade da IA</p>
+            <div className="flex gap-2">
+              {DIFFICULTY_OPTIONS.map(({ value, label }) => (
+                <Button
+                  key={value}
+                  variant={aiDifficulty === value ? "primary" : "secondary"}
+                  size="sm"
+                  onClick={() => setAIDifficulty(value)}
+                  data-testid={`playground-difficulty-${value}`}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
