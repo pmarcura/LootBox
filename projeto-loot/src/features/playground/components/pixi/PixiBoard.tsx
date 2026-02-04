@@ -69,7 +69,7 @@ type PixiBoardProps = {
   lastPlayed?: { cardId: string; slot: 1 | 2 | 3 } | null;
   /** Jogador atual (para PvP: perspectiva do jogador da vez) */
   myRole?: "player1" | "player2";
-  mode?: "vs-ia" | "vs-amigo";
+  mode?: "vs-ia" | "vs-amigo" | "coop";
 };
 
 export function PixiBoard({

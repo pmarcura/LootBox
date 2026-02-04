@@ -38,7 +38,7 @@ type PlaygroundBoardProps = {
   onStateChange: (state: MatchState) => void;
   config: GameConfig;
   onBack: () => void;
-  mode?: "vs-ia" | "vs-amigo";
+  mode?: "vs-ia" | "vs-amigo" | "coop";
 };
 
 function SlotCard({
