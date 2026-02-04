@@ -9,11 +9,6 @@ import { dissolveStrainsAction } from "../actions/dissolve-strains";
 import { getEssenceForRarity } from "../utils/essence";
 import { getStrainFamilyDisplay } from "@/lib/strain-family";
 import type { StrainItemGrouped } from "../types";
-import type { Rarity } from "@/features/gacha/types";
-
-function getPlaceholderByRarity(rarity: Rarity): string {
-  return `/images/creatures/${rarity}.svg`;
-}
 
 type StrainCardProps = {
   item: StrainItemGrouped;
@@ -63,14 +58,14 @@ export function StrainCard({ item }: StrainCardProps) {
               unoptimized={item.imageUrl!.startsWith("/")}
             />
           ) : (
-            <Image
-              src={getPlaceholderByRarity(item.rarity as Rarity)}
-              alt={item.name}
-              fill
-              className="object-contain p-6"
-              sizes="(max-width: 768px) 100vw, 33vw"
-              unoptimized
-            />
+            <div className="flex flex-col items-center justify-center p-6 text-center">
+              <span className="text-4xl font-bold text-zinc-400 dark:text-zinc-500">
+                {item.name.charAt(0)}
+              </span>
+              <span className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                {rarityLabels[item.rarity] ?? item.rarity}
+              </span>
+            </div>
           )}
           {item.count > 1 && (
             <div className="absolute right-2 top-2 rounded-lg bg-black/70 px-2.5 py-1 text-sm font-bold text-white backdrop-blur-sm">

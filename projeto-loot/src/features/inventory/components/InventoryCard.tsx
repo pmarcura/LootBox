@@ -14,10 +14,6 @@ type InventoryCardProps = {
   item: InventoryItemGrouped;
 };
 
-function getPlaceholderByRarity(rarity: Rarity): string {
-  return `/images/creatures/${rarity}.svg`;
-}
-
 const rarityLabels: Record<Rarity, string> = {
   common: "Comum",
   uncommon: "Incomum",
@@ -91,14 +87,14 @@ export function InventoryCard({ item }: InventoryCardProps) {
               unoptimized={item.imageUrl!.startsWith("/")}
             />
           ) : (
-            <Image
-              src={getPlaceholderByRarity(item.rarity)}
-              alt={item.name}
-              fill
-              className="object-contain p-6"
-              sizes="(max-width: 768px) 100vw, 33vw"
-              unoptimized
-            />
+            <div className="flex flex-col items-center justify-center p-6 text-center">
+              <span className="text-4xl font-bold text-zinc-400 dark:text-zinc-500">
+                {item.name.charAt(0)}
+              </span>
+              <span className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                {rarityLabel}
+              </span>
+            </div>
           )}
           {/* Badge quantidade - canto superior direito */}
           {item.count > 1 && (

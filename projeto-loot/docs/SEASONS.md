@@ -19,7 +19,7 @@ Exemplo mínimo de vessel:
   "base_hp": 7,
   "base_atk": 7,
   "base_mana": 3,
-  "image_url": "/images/creatures/rare.svg",
+  "image_url": "/images/creatures/NOME-DO-ARQUIVO.png",
   "series": "season01",
   "lore": "Descrição narrativa do monstro."
 }

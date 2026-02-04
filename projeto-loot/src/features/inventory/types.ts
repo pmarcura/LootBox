@@ -6,7 +6,7 @@ export type InventoryItem = {
   slug: string;
   rarity: Rarity;
   acquiredAt: string;
-  /** URL or path to creature image; fallback to placeholder by rarity when null */
+  /** URL or path to creature image; when null, UI shows empty state (no image request). */
   imageUrl?: string | null;
 };
 

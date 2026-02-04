@@ -13,7 +13,7 @@ Para habilitar o áudio completo, siga as instruções em **[public/sounds/READM
 - **Proporção padrão:** 2816×1536 px (horizontal, ~1,83:1). Todas as artes de personagens (vessels) e strains usam essa proporção.
 - **Nada cortado:** o app exibe as imagens com `object-contain` e containers com `aspect-[2816/1536]`, para que a imagem inteira apareça (pode haver letterboxing).
 - **Carta fundida:** a arte da carta fundida é **a mesma imagem do vessel** (gravada em `user_cards.image_url` no momento da fusão).
-- **Placeholders:** quando `image_url` for null, o inventário e os cards usam placeholders por raridade em `public/images/creatures/` (common, uncommon, rare, epic, legendary).
+- **Sem imagem:** quando `image_url` for null, o inventário e os cards exibem um estado vazio (inicial do nome + raridade), sem carregar arquivo externo. As imagens reais ficam em `public/images/creatures/` (vessels) e `public/images/strains/` (strains), em PNG.
 
 ### Responsivo e performance
 
