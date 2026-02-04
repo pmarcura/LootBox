@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRef, useCallback } from "react";
 import { Application, extend } from "@pixi/react";
 import { Container, Graphics, Text, FillGradient } from "pixi.js";
-import type { CardInMatch, MatchState } from "../../lib/types";
+import type { CardInMatch, MatchState, SlotIndex } from "../../lib/types";
 import { useCombatLayout } from "./useCombatLayout";
 import { useScreenShake } from "./useScreenShake";
 import { useParallax } from "./useParallax";
@@ -66,7 +66,7 @@ type PixiBoardProps = {
   isMyTurn: boolean;
   onCardLongPress?: (card: CardInMatch) => void;
   /** Última carta jogada (para animação de spawn) */
-  lastPlayed?: { cardId: string; slot: 1 | 2 | 3 } | null;
+  lastPlayed?: { cardId: string; slot: SlotIndex } | null;
   /** Jogador atual (para PvP: perspectiva do jogador da vez) */
   myRole?: "player1" | "player2";
   mode?: "vs-ia" | "vs-amigo" | "coop";
