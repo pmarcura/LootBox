@@ -78,7 +78,7 @@ Acesse o app em deploy (ex.: Vercel), crie sua conta e:
 
 Configure no projeto (ex.: Vercel → Settings → Environment Variables) as mesmas variáveis do `.env.local`, em especial:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL` — **deve ser a URL do projeto Supabase** (ex: `https://xxx.supabase.co`), **não** a URL do app (ex: genesis-gilt-chi.vercel.app). Se estiver errado, o "Entrar com Google" redireciona para o app em vez do Google.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (ou `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
 - `SUPABASE_SERVICE_ROLE_KEY`
 - **`DATABASE_URL`** — connection string do Postgres (Supabase: Settings → Database → Connection string; use **pooler**). Sem isso, inventário, fusão, resgate e marketplace falham em produção.

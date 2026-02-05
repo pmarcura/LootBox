@@ -13,9 +13,22 @@ function getAnonKey(): string {
 
 let _serviceRoleWarningLogged = false;
 
+/** URL do Supabase deve ser *.supabase.co. Se estiver como app (ex: vercel.app), o OAuth quebra. */
+function getSupabaseUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL ?? SUPABASE_PUBLIC_FALLBACK.url;
+  if (raw && !raw.includes("supabase.co")) {
+    if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
+      console.warn(
+        "[Supabase] NEXT_PUBLIC_SUPABASE_URL não é um domínio Supabase (*.supabase.co). Use a URL do projeto no Supabase Dashboard (ex: https://xxx.supabase.co).",
+      );
+    }
+    return SUPABASE_PUBLIC_FALLBACK.url;
+  }
+  return raw ?? SUPABASE_PUBLIC_FALLBACK.url;
+}
+
 export function getSupabaseEnv(): { url: string; anonKey: string } {
-  const url =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? SUPABASE_PUBLIC_FALLBACK.url;
+  const url = getSupabaseUrl();
   const anonKey = getAnonKey();
 
   // Validação só falha se nem env nem fallback tiverem URL/chave (não deve acontecer).
