@@ -176,7 +176,7 @@ export async function resetPasswordAction(
 
   const supabase = await createSupabaseServerClient();
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://genesis-gilt-chi.vercel.app";
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${baseUrl}/login/reset-password`,
   });
