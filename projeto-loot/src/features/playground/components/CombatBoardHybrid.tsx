@@ -826,17 +826,12 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                   <SlotCard
                     card={myBoardBySlot[i]}
                     keyword={myBoardBySlot[i]?.keyword ?? ""}
-                    combatPreview={
-                      myBoardBySlot[i]
-                        ? combatPreviewMap[myBoardBySlot[i]!.match_card_id]
-                        : undefined
-                    }
+                    combatPreview={myPreview}
                     displayHp={myBoardBySlot[i] && combatEvents ? liveHpMap[myBoardBySlot[i]!.match_card_id] : undefined}
                     slotNumber={slot}
                     isTarget={isTarget}
                     onClick={isTarget && playTarget ? () => handlePlayCard(playTarget, slot) : undefined}
                     isSpawning={!!(lastPlayed && myBoardBySlot[i]?.match_card_id === lastPlayed.cardId)}
-                    combatPreview={myPreview}
                     testId={`playground-slot-${slot}`}
                   />
                   </motion.div>
