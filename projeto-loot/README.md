@@ -83,6 +83,8 @@ Configure no projeto (ex.: Vercel → Settings → Environment Variables) as mes
 - `SUPABASE_SERVICE_ROLE_KEY`
 - **`DATABASE_URL`** — connection string do Postgres (Supabase: Settings → Database → Connection string; use **pooler**). Sem isso, inventário, fusão, resgate e marketplace falham em produção.
 
+**Login com Google:** No Supabase → Authentication → URL Configuration, adicione em **Redirect URLs** a URL do seu deploy, por exemplo `https://seudominio.com/auth/callback` (e, se usar previews, `https://*-seu-projeto.vercel.app/auth/callback`). Assim o OAuth redireciona para o mesmo domínio e evita loop de login.
+
 ### Troubleshooting
 
 - **`webpage_content_reporter.js`: Unexpected token 'export'** — Esse erro vem de scripts injetados por **extensões do navegador** (ex.: Cursor, ferramentas de acessibilidade), não do app. Pode ignorar ao depurar o Gênesis; para confirmar, teste em janela anônima sem extensões.
