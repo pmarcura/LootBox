@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { eq, and, sql, gte } from "drizzle-orm";
+import { eq, and, sql, gte, isNotNull } from "drizzle-orm";
 
 import { getDbWithAuth } from "@/lib/db";
 import {
@@ -132,9 +132,20 @@ export async function purchaseLootboxAction(
       else if (roll < probs[3]) rarity = "epic";
 
       const [vessel] = await tx
-        .select({ id: collectiblesCatalog.id, name: collectiblesCatalog.name, slug: collectiblesCatalog.slug })
+        .select({
+          id: collectiblesCatalog.id,
+          name: collectiblesCatalog.name,
+          slug: collectiblesCatalog.slug,
+          imageUrl: collectiblesCatalog.imageUrl,
+        })
         .from(collectiblesCatalog)
-        .where(eq(collectiblesCatalog.rarity, rarity))
+        .where(
+          and(
+            eq(collectiblesCatalog.rarity, rarity),
+            eq(collectiblesCatalog.series, "season01"),
+            isNotNull(collectiblesCatalog.imageUrl),
+          )
+        )
         .orderBy(sql`random()`)
         .limit(1);
 
@@ -163,9 +174,16 @@ export async function purchaseLootboxAction(
           name: strainsCatalog.name,
           slug: strainsCatalog.slug,
           family: strainsCatalog.family,
+          imageUrl: strainsCatalog.imageUrl,
         })
         .from(strainsCatalog)
-        .where(eq(strainsCatalog.rarity, rarity))
+        .where(
+          and(
+            eq(strainsCatalog.rarity, rarity),
+            eq(strainsCatalog.series, "season01"),
+            isNotNull(strainsCatalog.imageUrl),
+          )
+        )
         .orderBy(sql`random()`)
         .limit(1);
 
@@ -217,6 +235,7 @@ export async function purchaseLootboxAction(
           collectibleName: vessel.name,
           collectibleSlug: vessel.slug,
           rarity,
+          imageUrl: vessel.imageUrl ?? undefined,
         },
         strain: {
           userStrainId: ustrain.id,
@@ -225,6 +244,7 @@ export async function purchaseLootboxAction(
           slug: strain.slug,
           rarity,
           family: strain.family,
+          imageUrl: strain.imageUrl ?? undefined,
         },
       };
     });
@@ -239,6 +259,7 @@ export async function purchaseLootboxAction(
         collectibleName: result.vessel.collectibleName,
         collectibleSlug: result.vessel.collectibleSlug,
         rarity: result.vessel.rarity as RedemptionItem["rarity"],
+        imageUrl: result.vessel.imageUrl,
       },
       strain: {
         userStrainId: result.strain.userStrainId,
@@ -247,6 +268,7 @@ export async function purchaseLootboxAction(
         slug: result.strain.slug,
         rarity: result.strain.rarity as StrainDropItem["rarity"],
         family: result.strain.family as StrainDropItem["family"],
+        imageUrl: result.strain.imageUrl,
       },
     };
 

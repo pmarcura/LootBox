@@ -2,9 +2,12 @@
 
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
+import { Environment } from "@react-three/drei";
 
 type RevealCanvasProps = {
   children: React.ReactNode;
+  /** Maior DPR e qualidade no modo showcase 3D */
+  highQuality?: boolean;
 };
 
 function CanvasFallback() {
@@ -15,22 +18,24 @@ function CanvasFallback() {
   );
 }
 
-export function RevealCanvas({ children }: RevealCanvasProps) {
+export function RevealCanvas({ children, highQuality = false }: RevealCanvasProps) {
   return (
     <Suspense fallback={<CanvasFallback />}>
       <Canvas
         camera={{ position: [0, 0, 6], fov: 50 }}
-        dpr={[1, 2]}
+        dpr={highQuality ? [1.5, 3] : [1, 2]}
         gl={{
           antialias: true,
           alpha: true,
           powerPreference: "high-performance",
+          stencil: false,
         }}
         style={{ background: "transparent" }}
       >
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
         <directionalLight position={[-5, 3, -5]} intensity={0.3} />
+        <Environment preset="night" />
         {children}
       </Canvas>
     </Suspense>

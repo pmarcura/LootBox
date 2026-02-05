@@ -12,9 +12,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 function getConnectionString(): string {
   const url = process.env.DATABASE_URL;
   if (!url) {
-    throw new Error(
-      "DATABASE_URL is required for Drizzle. Add it to .env.local (Supabase: Settings > Database > Connection string, use pooler)."
-    );
+    const hint =
+      typeof process.env.VERCEL === "string"
+        ? "Defina DATABASE_URL em Vercel: Project > Settings > Environment Variables. Use a connection string do Supabase (Settings > Database > Connection string, pooler)."
+        : "Adicione DATABASE_URL ao .env.local (Supabase: Settings > Database > Connection string, use pooler).";
+    throw new Error(`DATABASE_URL é obrigatória para o Drizzle. ${hint}`);
   }
   return url;
 }

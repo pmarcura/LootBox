@@ -24,6 +24,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 function buildGroupsBySeries(
   data: InventoryRow[],
   consumedIds: Set<string>,
+  usedAsVesselInventoryIds: Set<string>,
 ): Map<string, InventoryItemGrouped[]> {
   const bySeriesAndCollectible = new Map<
     string,
@@ -39,7 +40,8 @@ function buildGroupsBySeries(
     const seriesKey = collectible.series ?? "sem-serie";
     const collectibleKey = collectible.id;
     const key = `${seriesKey}::${collectibleKey}`;
-    const canDissolve = !consumedIds.has(row.id);
+    const canDissolve =
+      !consumedIds.has(row.id) && !usedAsVesselInventoryIds.has(row.id);
 
     const existing = bySeriesAndCollectible.get(key);
     if (existing) {
@@ -75,6 +77,9 @@ function buildGroupsBySeries(
       inventoryIds: entry.ids,
       dissolveableIds: entry.dissolveableIds,
       acquiredAt: entry.acquiredAt,
+      baseHp: entry.collectible.base_hp,
+      baseAtk: entry.collectible.base_atk,
+      baseMana: entry.collectible.base_mana,
     };
 
     const list = groupsBySeries.get(seriesLabel) ?? [];
@@ -96,6 +101,7 @@ type CardRow = {
   vessel_inventory_id?: string | null;
   vessel_collectible_id: string;
   image_url?: string | null;
+  strain: { rarity: string } | { rarity: string }[] | null;
 };
 
 export default async function InventoryPage() {
@@ -108,36 +114,53 @@ export default async function InventoryPage() {
     redirect("/login?redirect=/inventory");
   }
 
-  const [inventoryRes, strainsRes, cardsRes, ledgerInvRes, ledgerStrainRes] =
-    await Promise.all([
-      supabase
-        .from("user_inventory")
-        .select(
-          "id, acquired_at, collectible:collectibles_catalog(id, name, slug, rarity, image_url, series)",
-        )
-        .eq("user_id", user.id)
-        .order("acquired_at", { ascending: false }),
-      supabase
-        .from("user_strains")
-        .select(
-          "id, acquired_at, strain:strains_catalog(id, name, slug, rarity, family, image_url)",
-        )
-        .eq("user_id", user.id)
-        .order("acquired_at", { ascending: false }),
-      supabase
-        .from("user_cards")
-        .select("id, token_id, final_hp, final_atk, mana_cost, keyword, created_at, vessel_collectible_id, image_url")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("audit_inventory_ledger")
-        .select("original_id")
-        .eq("user_id", user.id),
-      supabase
-        .from("audit_strains_ledger")
-        .select("original_id")
-        .eq("user_id", user.id),
-    ]);
+  const [
+    inventoryRes,
+    strainsRes,
+    cardsRes,
+    ledgerInvRes,
+    ledgerStrainRes,
+    season01VesselsRes,
+    season01StrainsRes,
+    profileRes,
+  ] = await Promise.all([
+    supabase
+      .from("user_inventory")
+      .select(
+        "id, acquired_at, collectible:collectibles_catalog(id, name, slug, rarity, image_url, series, base_hp, base_atk, base_mana)",
+      )
+      .eq("user_id", user.id)
+      .order("acquired_at", { ascending: false }),
+    supabase
+      .from("user_strains")
+      .select(
+        "id, acquired_at, strain:strains_catalog(id, name, slug, rarity, family, image_url, series)",
+      )
+      .eq("user_id", user.id)
+      .order("acquired_at", { ascending: false }),
+    supabase
+      .from("user_cards")
+      .select("id, token_id, final_hp, final_atk, mana_cost, keyword, created_at, vessel_inventory_id, vessel_collectible_id, image_url, strain:strains_catalog(rarity)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("audit_inventory_ledger")
+      .select("original_id")
+      .eq("user_id", user.id),
+    supabase
+      .from("audit_strains_ledger")
+      .select("original_id")
+      .eq("user_id", user.id),
+    supabase
+      .from("collectibles_catalog")
+      .select("id", { count: "exact", head: true })
+      .eq("series", "season01"),
+    supabase
+      .from("strains_catalog")
+      .select("id", { count: "exact", head: true })
+      .eq("series", "season01"),
+    supabase.from("profiles").select("season01_purge_claimed_at").eq("id", user.id).single(),
+  ]);
 
   const consumedInventoryIds = new Set(
     (ledgerInvRes.data ?? []).map(
@@ -151,44 +174,85 @@ export default async function InventoryPage() {
   );
 
   const rows = (inventoryRes.data ?? []) as InventoryRow[];
-  const groupsBySeries = buildGroupsBySeries(rows, consumedInventoryIds);
+  const cardsData = (cardsRes.data ?? []) as CardRow[];
+  const usedAsVesselInventoryIds = new Set(
+    cardsData
+      .map((c) => c.vessel_inventory_id)
+      .filter((id): id is string => Boolean(id)),
+  );
+  const rowsForVessels = rows.filter((r) => !usedAsVesselInventoryIds.has(r.id));
+  const groupsBySeries = buildGroupsBySeries(
+    rowsForVessels,
+    consumedInventoryIds,
+    usedAsVesselInventoryIds,
+  );
 
   const strainRows = (strainsRes.data ?? []) as StrainRow[];
   const strainGroups = buildStrainGroups(strainRows, consumedStrainIds);
 
-  const cardsData = (cardsRes.data ?? []) as CardRow[];
   const vesselCollectibleIds = cardsData
     .map((c) => c.vessel_collectible_id)
     .filter(Boolean);
   const vesselCollectibleIdSet = new Set(vesselCollectibleIds);
-  const vesselNamesByCollectibleId: Record<string, { name: string; slug: string }> = {};
+  const vesselCatalogByCollectibleId: Record<
+    string,
+    { name: string; slug: string; image_url?: string | null }
+  > = {};
   if (vesselCollectibleIdSet.size > 0) {
     const { data: catalogRows } = await supabase
       .from("collectibles_catalog")
-      .select("id, name, slug")
+      .select("id, name, slug, image_url")
       .in("id", Array.from(vesselCollectibleIdSet));
     for (const r of catalogRows ?? []) {
-      vesselNamesByCollectibleId[r.id] = { name: r.name, slug: r.slug };
+      vesselCatalogByCollectibleId[r.id] = {
+        name: r.name,
+        slug: r.slug,
+        image_url: r.image_url ?? null,
+      };
     }
   }
 
-  const userCards: UserCardItem[] = cardsData.map((c) => ({
-    id: c.id,
-    tokenId: c.token_id,
-    finalHp: c.final_hp,
-    finalAtk: c.final_atk,
-    manaCost: c.mana_cost,
-    keyword: c.keyword,
-    vesselName: vesselNamesByCollectibleId[c.vessel_collectible_id]?.name,
-    vesselSlug: vesselNamesByCollectibleId[c.vessel_collectible_id]?.slug,
-    createdAt: c.created_at,
-    imageUrl: normalizeCatalogImageUrl(c.image_url) ?? null,
-  }));
+  const userCards: UserCardItem[] = cardsData.map((c) => {
+    const strain = Array.isArray(c.strain) ? c.strain[0] : c.strain;
+    const strainRarity = strain?.rarity as UserCardItem["strainRarity"] | undefined;
+    const catalog = vesselCatalogByCollectibleId[c.vessel_collectible_id];
+    return {
+      id: c.id,
+      tokenId: c.token_id,
+      finalHp: c.final_hp,
+      finalAtk: c.final_atk,
+      manaCost: c.mana_cost,
+      keyword: c.keyword,
+      vesselName: catalog?.name,
+      vesselSlug: catalog?.slug,
+      createdAt: c.created_at,
+      imageUrl:
+        normalizeCatalogImageUrl(c.image_url) ??
+        normalizeCatalogImageUrl(catalog?.image_url) ??
+        null,
+      strainRarity: strainRarity ?? null,
+    };
+  });
 
-  const totalVessels = rows.length;
+  const totalVessels = rowsForVessels.length;
   const totalStrains = strainRows.length;
   const totalCards = userCards.length;
   const hasAny = totalVessels > 0 || totalStrains > 0 || totalCards > 0;
+
+  const totalSeason01Vessels = season01VesselsRes.count ?? 0;
+  const totalSeason01Strains = season01StrainsRes.count ?? 0;
+  const season01Total = totalSeason01Vessels + totalSeason01Strains;
+  const userSeason01Vessels = (groupsBySeries.get("season01") ?? []).length;
+  const userSeason01Strains = new Set(
+    strainRows
+      .map((r) => {
+        const strain = Array.isArray(r.strain) ? r.strain[0] : r.strain;
+        return strain?.series === "season01" ? strain.id : null;
+      })
+      .filter((id): id is string => id != null),
+  ).size;
+  const season01Owned = userSeason01Vessels + userSeason01Strains;
+  const season01PurgeClaimedAt = (profileRes.data as { season01_purge_claimed_at?: string | null } | null)?.season01_purge_claimed_at ?? null;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 px-4 py-8 dark:from-zinc-950 dark:to-black sm:px-6">
@@ -215,8 +279,8 @@ export default async function InventoryPage() {
         </header>
 
         {!hasAny ? (
-          <div className="rounded-2xl border-2 border-dashed border-zinc-300 bg-white p-12 text-center dark:border-zinc-700 dark:bg-zinc-950">
-            <p className="mb-6 text-zinc-600 dark:text-zinc-400">
+          <div className="rounded-xl border-2 border-[var(--biopunk-metal-light)] biopunk-panel-metal p-12 text-center dark:bg-zinc-950">
+            <p className="mb-6 text-zinc-500 dark:text-zinc-400">
               Você ainda não possui nenhum item.
             </p>
             <Link
@@ -235,6 +299,9 @@ export default async function InventoryPage() {
               totalVessels={totalVessels}
               totalStrains={totalStrains}
               totalCards={totalCards}
+              season01Total={season01Total}
+              season01Owned={season01Owned}
+              season01PurgeClaimedAt={season01PurgeClaimedAt}
             />
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Link

@@ -8,6 +8,10 @@ export type RedemptionItem = {
   collectibleName: string;
   collectibleSlug: string;
   rarity: Rarity;
+  imageUrl?: string;
+  baseHp?: number;
+  baseAtk?: number;
+  baseMana?: number;
 };
 
 export type StrainDropItem = {
@@ -17,6 +21,7 @@ export type StrainDropItem = {
   slug: string;
   rarity: Rarity;
   family: StrainFamily;
+  imageUrl?: string;
 };
 
 export type DropResult = {
@@ -26,5 +31,5 @@ export type DropResult = {
 
 export type RedeemState =
   | { status: "idle" }
-  | { status: "success"; drop: DropResult }
+  | { status: "success"; drops: DropResult[] }
   | { status: "error"; message: string };

@@ -9,6 +9,8 @@ import { dissolveStrainsAction } from "../actions/dissolve-strains";
 import { getEssenceForRarity } from "../utils/essence";
 import { getStrainFamilyDisplay } from "@/lib/strain-family";
 import type { StrainItemGrouped } from "../types";
+import { CorruptedDataPlaceholder } from "./CorruptedDataPlaceholder";
+import { Card3D } from "./Card3D";
 
 type StrainCardProps = {
   item: StrainItemGrouped;
@@ -26,6 +28,7 @@ export function StrainCard({ item }: StrainCardProps) {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [dissolveExtras, setDissolveExtras] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [state, formAction, isPending] = useActionState(dissolveStrainsAction, null);
 
   useEffect(() => {
@@ -46,9 +49,10 @@ export function StrainCard({ item }: StrainCardProps) {
 
   return (
     <>
-      <article className="flex flex-col overflow-hidden rounded-2xl border-2 border-zinc-200 bg-white shadow-md dark:border-zinc-700 dark:bg-zinc-950">
-        <div className="relative aspect-[2816/1536] w-full shrink-0 overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
-          {hasImage ? (
+      <Card3D className="h-full" maxTilt={6}>
+      <article className="crt-container flex h-full flex-col overflow-hidden rounded-xl border-2 border-[var(--biopunk-cyan)]/40 bg-[var(--biopunk-metal-dark)] shadow-[0_0_0_1px_var(--biopunk-cyan)]">
+        <div className="relative min-h-[140px] w-full shrink-0 overflow-hidden rounded-t-lg bg-[var(--biopunk-metal-dark)] aspect-[2816/1536]">
+          {hasImage && !imageError ? (
             <Image
               src={item.imageUrl!}
               alt={item.name}
@@ -56,13 +60,16 @@ export function StrainCard({ item }: StrainCardProps) {
               className="object-contain"
               sizes="(max-width: 768px) 100vw, 33vw"
               unoptimized={item.imageUrl!.startsWith("/")}
+              onError={() => setImageError(true)}
             />
+          ) : imageError ? (
+            <CorruptedDataPlaceholder />
           ) : (
-            <div className="flex flex-col items-center justify-center p-6 text-center">
-              <span className="text-4xl font-bold text-zinc-400 dark:text-zinc-500">
+            <div className="flex h-full flex-col items-center justify-center p-6 text-center bg-zinc-300 dark:bg-zinc-700">
+              <span className="text-4xl font-bold text-zinc-600 dark:text-zinc-300">
                 {item.name.charAt(0)}
               </span>
-              <span className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+              <span className="mt-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">
                 {rarityLabels[item.rarity] ?? item.rarity}
               </span>
             </div>
@@ -73,30 +80,30 @@ export function StrainCard({ item }: StrainCardProps) {
             </div>
           )}
         </div>
-        <div className="flex flex-1 flex-col p-4">
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+        <div className="flex flex-1 flex-col border-t-2 border-[var(--biopunk-cyan)]/30 bg-[var(--biopunk-metal)] p-4 text-[var(--biopunk-cyan)]/95">
+          <h3 className="text-lg font-bold text-white">
             {item.name}
           </h3>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <Badge tone={item.rarity as "common" | "uncommon" | "rare" | "epic" | "legendary"}>
               {rarityLabels[item.rarity] ?? item.rarity}
             </Badge>
-            <span className="rounded bg-zinc-200 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+            <span className="rounded border border-[var(--biopunk-cyan)]/40 bg-[var(--biopunk-cyan)]/10 px-2 py-0.5 text-xs font-medium text-zinc-200">
               {getStrainFamilyDisplay(item.family as "NEURO" | "SHELL" | "PSYCHO")}
             </span>
             {item.count > 1 && (
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              <span className="text-xs text-zinc-400">
                 {item.count}×
               </span>
             )}
           </div>
           {hasUsed && (
-            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-2 text-xs text-zinc-400">
               {item.count - item.dissolveableIds.length} usado(s) em fusão
             </p>
           )}
           {canDissolve && (
-            <div className="mt-4 flex flex-col gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+            <div className="mt-4 flex flex-col gap-2 border-t border-[var(--biopunk-cyan)]/20 pt-4">
               {item.dissolveableIds.length > 1 && (
                 <button
                   type="button"
@@ -104,7 +111,7 @@ export function StrainCard({ item }: StrainCardProps) {
                     setDissolveExtras(true);
                     setModalOpen(true);
                   }}
-                  className="flex min-h-[44px] items-center justify-center rounded-xl bg-amber-500/15 px-4 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-500/25 active:scale-[0.99] dark:text-amber-300 dark:hover:bg-amber-500/20"
+                  className="flex min-h-[44px] items-center justify-center rounded-xl bg-[var(--biopunk-amber)]/20 px-4 py-2.5 text-sm font-medium text-[var(--biopunk-amber)] transition-colors hover:bg-[var(--biopunk-amber)]/30 active:scale-[0.99]"
                 >
                   Dissolver {item.dissolveableIds.length - 1} extras
                 </button>
@@ -115,7 +122,7 @@ export function StrainCard({ item }: StrainCardProps) {
                   setDissolveExtras(false);
                   setModalOpen(true);
                 }}
-                className="flex min-h-[44px] items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 active:scale-[0.99] dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-300 dark:hover:bg-zinc-700/50"
+                className="flex min-h-[44px] items-center justify-center rounded-xl border border-[var(--biopunk-cyan)]/50 bg-[var(--biopunk-metal-dark)] px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-[var(--biopunk-metal-light)] active:scale-[0.99]"
               >
                 Dissolver {item.dissolveableIds.length > 1 ? "todos" : "strain"}
               </button>
@@ -123,6 +130,7 @@ export function StrainCard({ item }: StrainCardProps) {
           )}
         </div>
       </article>
+      </Card3D>
 
       {modalOpen && canDissolve && countToDissolve > 0 && (
         <div

@@ -4,8 +4,6 @@ import * as React from "react";
 import dynamic from "next/dynamic";
 
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { CODE_LENGTH, CODE_PATTERN } from "../constants";
 import { redeemAction } from "../actions/redeem";
 import type { DropResult, RedeemState } from "../types";
 
@@ -29,40 +27,36 @@ export function RedeemForm() {
     redeemAction,
     initialState,
   );
-  const [revealDrop, setRevealDrop] = React.useState<DropResult | null>(null);
+  const [revealDrops, setRevealDrops] = React.useState<DropResult[] | null>(null);
   const formRef = React.useRef<HTMLFormElement>(null);
 
-  // When redemption succeeds, show the reveal experience
+  // When redemption succeeds, show the reveal experience (usa primeiro drop para 3D)
   React.useEffect(() => {
-    if (state.status === "success") {
-      setRevealDrop(state.drop);
+    if (state.status === "success" && state.drops.length > 0) {
+      setRevealDrops(state.drops);
     }
   }, [state]);
 
   const handleRevealComplete = React.useCallback(() => {
-    setRevealDrop(null);
-    // Reset the form
+    setRevealDrops(null);
     formRef.current?.reset();
   }, []);
 
   return (
     <>
       <div className="space-y-6">
-        <form ref={formRef} action={formAction} className="flex flex-col gap-4 md:flex-row">
-          <label htmlFor="redeem-code" className="flex w-full flex-col gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Código do kit
-            <Input
-              id="redeem-code"
-              name="code"
-              placeholder="Ex: 2GYKCKHXJ6S6"
+        <form ref={formRef} action={formAction} className="flex flex-col gap-4">
+          <label htmlFor="redeem-codes" className="flex w-full flex-col gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            Códigos do kit (até 5)
+            <textarea
+              id="redeem-codes"
+              name="codes"
+              placeholder="Um código por linha ou separados por vírgula (máx. 5). Ex: 2GYKCKHXJ6S6"
               autoComplete="off"
-              minLength={CODE_LENGTH}
-              maxLength={CODE_LENGTH}
-              pattern={CODE_PATTERN}
-              className="uppercase tracking-[0.3em]"
-              required
+              rows={3}
+              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-sm uppercase tracking-[0.2em] dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
               aria-describedby={state.status === "error" ? "redeem-error" : undefined}
-            aria-invalid={state.status === "error"}
+              aria-invalid={state.status === "error"}
             />
           </label>
           <Button type="submit" disabled={isPending}>
@@ -79,8 +73,8 @@ export function RedeemForm() {
       </div>
 
       {/* Fullscreen 3D reveal experience */}
-      {revealDrop && (
-        <RevealExperience drop={revealDrop} onComplete={handleRevealComplete} />
+      {revealDrops && revealDrops.length > 0 && (
+        <RevealExperience drops={revealDrops} onComplete={handleRevealComplete} />
       )}
     </>
   );

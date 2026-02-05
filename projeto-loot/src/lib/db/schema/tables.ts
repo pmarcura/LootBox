@@ -26,6 +26,9 @@ export const profiles = pgTable("profiles", {
   starterPackGrantedAt: timestamp("starter_pack_granted_at", {
     withTimezone: true,
   }),
+  season01PurgeClaimedAt: timestamp("season01_purge_claimed_at", {
+    withTimezone: true,
+  }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -55,6 +58,7 @@ export const strainsCatalog = pgTable("strains_catalog", {
   name: text("name").notNull(),
   rarity: rarityEnum("rarity").notNull(),
   family: strainFamilyEnum("family").notNull(),
+  series: text("series"),
   imageUrl: text("image_url"),
   description: text("description"),
   penalty: text("penalty"),

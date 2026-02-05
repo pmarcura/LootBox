@@ -82,10 +82,16 @@ function CardWithTexture({
   showShowcase?: boolean;
 }) {
   const config = RARITY_CONFIG[rarity];
+  const baseUrl =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const url =
-    typeof window !== "undefined" && imageUrl.startsWith("/")
-      ? window.location.origin + imageUrl
-      : imageUrl;
+    imageUrl.startsWith("/") && baseUrl
+      ? baseUrl + imageUrl
+      : imageUrl.startsWith("http")
+        ? imageUrl
+        : imageUrl;
   const texture = useTexture(url);
   const meshRef = useRef<THREE.Mesh>(null);
 

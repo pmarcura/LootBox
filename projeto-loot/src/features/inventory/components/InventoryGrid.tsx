@@ -17,8 +17,9 @@ function formatSeriesLabel(series: string): string {
 export function InventoryGrid({ groupsBySeries }: InventoryGridProps) {
   if (groupsBySeries.size === 0) {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-zinc-300 bg-white/50 p-12 text-center text-sm text-zinc-500 dark:border-zinc-600 dark:bg-zinc-950/50 dark:text-zinc-400">
-        Seu inventário está vazio. Resgate um código para iniciar.
+      <div className="rounded-xl border-2 border-[var(--biopunk-metal-light)] biopunk-panel-metal p-12 text-center text-sm text-zinc-400 dark:text-zinc-500">
+        <p className="font-medium">Seu inventário está vazio.</p>
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-600">Resgate um código para iniciar.</p>
       </div>
     );
   }

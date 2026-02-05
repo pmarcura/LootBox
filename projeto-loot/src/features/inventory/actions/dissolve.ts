@@ -7,6 +7,7 @@ import { eq, and, inArray, sql } from "drizzle-orm";
 import { getDbWithAuth } from "@/lib/db";
 import {
   userInventory,
+  userCards,
   profiles,
   redemptionCodes,
   auditInventoryLedger,
@@ -150,6 +151,11 @@ export async function dissolveAction(
         .update(redemptionCodes)
         .set({ redeemedInventoryId: null })
         .where(inArray(redemptionCodes.redeemedInventoryId, ids));
+
+      await tx
+        .update(userCards)
+        .set({ vesselInventoryId: null })
+        .where(inArray(userCards.vesselInventoryId, ids));
 
       await tx
         .delete(userInventory)

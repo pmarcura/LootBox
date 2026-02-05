@@ -23,6 +23,9 @@ export type InventoryItemGrouped = {
   /** Subset of inventoryIds that are not used in fusion (can be dissolved) */
   dissolveableIds: string[];
   acquiredAt: string;
+  baseHp?: number;
+  baseAtk?: number;
+  baseMana?: number;
 };
 
 export type StrainFamily = "NEURO" | "SHELL" | "PSYCHO";
@@ -41,6 +44,9 @@ export type StrainItemGrouped = {
   acquiredAt: string;
 };
 
+/** Rarity do strain conectado à carta fundida (1–5: comum → lendário) */
+export type StrainRarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
+
 /** Fused card for inventory display */
 export type UserCardItem = {
   id: string;
@@ -53,6 +59,8 @@ export type UserCardItem = {
   vesselSlug?: string;
   imageUrl?: string | null;
   createdAt: string;
+  /** Rarity da strain usada na fusão (para ícone nível 1–5) */
+  strainRarity?: StrainRarity | null;
 };
 
 /** Row shape from user_inventory select (collectible relation) */
@@ -63,6 +71,9 @@ export type CollectibleRow = {
   rarity: string;
   image_url?: string | null;
   series?: string | null;
+  base_hp?: number;
+  base_atk?: number;
+  base_mana?: number;
 };
 
 export type InventoryRow = {
@@ -78,6 +89,7 @@ export type StrainCatalogRow = {
   rarity: string;
   family: string;
   image_url?: string | null;
+  series?: string | null;
 };
 
 export type StrainRow = {

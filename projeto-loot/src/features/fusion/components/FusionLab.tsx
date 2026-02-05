@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useRef, useState, useCallback } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/Button";
@@ -10,8 +9,10 @@ import { fuseCardAction, type FuseState } from "../actions/fuse";
 import { previewFusion } from "../utils/previewFusion";
 import type { VesselItem, StrainItem } from "./FusionSlot";
 import { FusionSlot } from "./FusionSlot";
+import { FusionRevealExperience } from "./FusionRevealExperience";
 import { MutationGrid } from "./MutationGrid";
-import { SlideToConfirm } from "./SlideToConfirm";
+import { ReactorLever } from "./ReactorLever";
+import { FusionVoltmeter } from "./FusionVoltmeter";
 import { FlavorTicker } from "./FlavorTicker";
 import { StrainFamilyIcon } from "./StrainFamilyIcon";
 import { TransferTube } from "./TransferTube";
@@ -68,67 +69,48 @@ export function FusionLab({ vessels, strains }: FusionLabProps) {
   const canFuse = vessels.length > 0 && strains.length > 0;
   const bothSelected = selectedVessel && selectedStrain;
 
-  // Success: O Batismo (com animação se motion permitido)
-  if (state.status === "success") {
-    const familyColor =
-      selectedStrain?.family === "NEURO"
-        ? "border-violet-500"
-        : selectedStrain?.family === "SHELL"
-          ? "border-emerald-500"
-          : "border-amber-500";
-    const duration = prefersReducedMotion ? 0 : 0.4;
+  const handleDropVessel = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      try {
+        const raw = e.dataTransfer.getData("application/json");
+        if (!raw) return;
+        const v = JSON.parse(raw) as VesselOption;
+        if (v?.inventoryId) setSelectedVessel(v);
+      } catch {
+        // ignore
+      }
+    },
+    [],
+  );
+  const handleDropStrain = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      try {
+        const raw = e.dataTransfer.getData("application/json");
+        if (!raw) return;
+        const s = JSON.parse(raw) as StrainOption;
+        if (s?.userStrainId) setSelectedStrain(s);
+      } catch {
+        // ignore
+      }
+    },
+    [],
+  );
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }, []);
+
+  // Success: mesmo padrão do resgate — 3D (carta sai) + Continuar → tela de detalhes
+  if (state.status === "success" && selectedVessel && selectedStrain) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration }}
-        className="mx-auto max-w-md space-y-6 rounded-2xl border-2 border-zinc-700 bg-zinc-900/80 p-6"
-      >
-        <motion.h2
-          initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration, delay: prefersReducedMotion ? 0 : 0.1 }}
-          className="text-center text-xl font-bold text-zinc-100"
-        >
-          Mutação concluída
-        </motion.h2>
-        <motion.div
-          initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration, delay: prefersReducedMotion ? 0 : 0.15 }}
-          className={`rounded-2xl border-2 ${familyColor} bg-zinc-900 p-4 shadow-lg`}
-        >
-          <h3 className="text-lg font-semibold text-zinc-100">
-            {selectedVessel?.name ?? "Carta fundida"}
-          </h3>
-          <span className="mt-2 inline-block rounded bg-violet-600 px-2 py-0.5 text-xs font-semibold uppercase text-white">
-            {state.keyword}
-          </span>
-          <dl className="mt-4 grid grid-cols-3 gap-2 text-sm">
-            <dt className="text-zinc-500">HP</dt>
-            <dd className="font-medium text-zinc-100">{state.finalHp}</dd>
-            <dt className="text-zinc-500">ATK</dt>
-            <dd className="font-medium text-zinc-100">{state.finalAtk}</dd>
-            <dt className="text-zinc-500">Mana</dt>
-            <dd className="font-medium text-zinc-100">{state.manaCost}</dd>
-          </dl>
-          <p className="mt-3 font-mono text-xs text-zinc-400">
-            #{state.tokenId.slice(0, 8).toUpperCase()}
-          </p>
-        </motion.div>
-        <div className="flex flex-col gap-3">
-          <Link href="/inventory">
-            <Button className="w-full">Ver no inventário</Button>
-          </Link>
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={() => window.location.reload()}
-          >
-            Fundir outra
-          </Button>
-        </div>
-      </motion.div>
+      <FusionRevealExperience
+        vessel={selectedVessel}
+        strain={selectedStrain}
+        state={state}
+        onClose={() => window.location.reload()}
+      />
     );
   }
 
@@ -166,21 +148,44 @@ export function FusionLab({ vessels, strains }: FusionLabProps) {
           value={selectedStrain?.userStrainId ?? ""}
         />
 
-        {/* Hero: tubo de transferência no topo + dois slots */}
+        {/* Hero: painel do reator — tubo no topo, tanques + câmara de reação */}
         <section
-          className="relative rounded-2xl border border-cyan-500/20 bg-black/80 p-4 pt-12 shadow-[0_0_30px_rgba(34,211,238,0.08)]"
+          className="relative crt-container biopunk-panel-metal rounded-xl border-2 border-[var(--biopunk-metal-light)] p-4 pt-12 shadow-[var(--biopunk-glow-cyan)]"
           aria-label="Bancada de fusão"
+          style={{ boxShadow: "0 0 30px rgba(34, 211, 238, 0.08), inset 0 0 40px rgba(0,0,0,0.3)" }}
         >
           <TransferTube />
-          <div className="relative grid grid-cols-2 gap-4">
-            <div className="relative z-10">
+          <div className="relative grid grid-cols-[1fr_auto_1fr] gap-2 items-stretch">
+            <div
+              className="relative z-10 min-w-0"
+              onDrop={handleDropVessel}
+              onDragOver={handleDragOver}
+            >
               <FusionSlot
                 type="vessel"
                 item={selectedVessel}
                 onClick={() => setActiveTab("vessels")}
               />
             </div>
-            <div className="relative z-10">
+            {/* Câmara de reação: vórtice quando vazia, pronta quando ambos preenchidos */}
+            <div
+              className={bothSelected
+                ? "flex w-12 flex-col items-center justify-center rounded-lg border-2 border-amber-500/60 bg-amber-950/30 shadow-[var(--biopunk-glow-amber)]"
+                : "flex w-12 flex-col items-center justify-center rounded-lg border-2 border-cyan-500/30 bg-cyan-950/20"
+              }
+              aria-hidden
+            >
+              {bothSelected ? (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">OK</span>
+              ) : (
+                <span className="text-[10px] font-mono text-cyan-400/70 animate-pulse">...</span>
+              )}
+            </div>
+            <div
+              className="relative z-10 min-w-0"
+              onDrop={handleDropStrain}
+              onDragOver={handleDragOver}
+            >
               <FusionSlot
                 type="strain"
                 item={selectedStrain}
@@ -224,8 +229,13 @@ export function FusionLab({ vessels, strains }: FusionLabProps) {
                   <button
                     key={v.inventoryId}
                     type="button"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("application/json", JSON.stringify(v));
+                      e.dataTransfer.effectAllowed = "copy";
+                    }}
                     onClick={() => setSelectedVessel(v)}
-                    className={`rounded-xl border-2 px-3 py-2 text-left text-sm transition-colors ${
+                    className={`cursor-grab active:cursor-grabbing rounded-xl border-2 px-3 py-2 text-left text-sm transition-colors ${
                       selectedVessel?.inventoryId === v.inventoryId
                         ? "border-violet-500 bg-violet-950/50 text-zinc-100"
                         : "border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:border-zinc-600"
@@ -250,8 +260,13 @@ export function FusionLab({ vessels, strains }: FusionLabProps) {
                   <button
                     key={s.userStrainId}
                     type="button"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("application/json", JSON.stringify(s));
+                      e.dataTransfer.effectAllowed = "copy";
+                    }}
                     onClick={() => setSelectedStrain(s)}
-                    className={`rounded-xl border-2 px-3 py-2 text-left text-sm transition-colors ${
+                    className={`cursor-grab active:cursor-grabbing rounded-xl border-2 px-3 py-2 text-left text-sm transition-colors ${
                       selectedStrain?.userStrainId === s.userStrainId
                         ? "border-emerald-500 bg-emerald-950/50 text-zinc-100"
                         : "border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:border-zinc-600"
@@ -271,9 +286,10 @@ export function FusionLab({ vessels, strains }: FusionLabProps) {
           </div>
         </section>
 
-        {/* Painel de mutação (grid tático) + slider de sessão */}
+        {/* Painel de mutação (grid tático) + voltímetro + alavanca */}
         {bothSelected && preview && (
           <section aria-label="Previsão de mutação e sessão">
+            <FusionVoltmeter value={100} className="mx-auto mb-4" />
             <MutationGrid
               attack={{ base: selectedVessel.baseAtk, final: preview.finalAtk }}
               life={{ base: selectedVessel.baseHp, final: preview.finalHp }}
@@ -296,11 +312,10 @@ export function FusionLab({ vessels, strains }: FusionLabProps) {
               className="mt-3"
             />
             <div className="mt-4">
-              <SlideToConfirm
+              <ReactorLever
                 onConfirm={handleConfirm}
                 disabled={!bothSelected || isPending}
                 isPending={isPending}
-                label="ARRASTE PARA INICIAR SESSÃO"
               />
               <Button
                 type="button"

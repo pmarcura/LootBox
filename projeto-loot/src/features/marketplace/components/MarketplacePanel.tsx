@@ -109,7 +109,7 @@ export function MarketplacePanel({ tiers, essenceBalance }: MarketplacePanelProp
       </div>
 
       {revealDrop && (
-        <RevealExperience drop={revealDrop} onComplete={handleRevealComplete} />
+        <RevealExperience drops={[revealDrop]} onComplete={handleRevealComplete} />
       )}
     </>
   );

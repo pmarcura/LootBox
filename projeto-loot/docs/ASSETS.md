@@ -6,6 +6,17 @@ O reveal (abertura da caixa) usa sons para impacto, rachaduras, explosão e fanf
 
 Para habilitar o áudio completo, siga as instruções em **[public/sounds/README.md](../public/sounds/README.md)**: lista de arquivos necessários, especificações e fontes sugeridas (freesound, mixkit, zapsplat).
 
+## Áudio da fusão (Câmara de Fusão)
+
+Sons opcionais para a experiência biopunk da fusão (fallback silencioso se não presentes):
+
+- **Drop no slot (CLANK-HISS):** ao soltar vessel ou strain no tanque; metálico + escape de ar.
+- **Zumbido de energia:** quando ambos os slots estão preenchidos (loop baixo).
+- **Alavanca / botão:** ao puxar a alavanca para iniciar fusão.
+- **Descarga / clímax:** ao forjar a nova carta (flash de energia).
+
+Colocar em `public/sounds/fusion/` (ex.: `clank-hiss.mp3`, `hum.mp3`, `lever.mp3`, `discharge.mp3`) e referenciar no código quando o player de áudio da fusão for implementado.
+
 ## Imagens (vessels, strains e cartas)
 
 ### Formato e regra de exibição

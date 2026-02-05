@@ -14,6 +14,21 @@
   --combat-slice-collision: 15;
   --combat-slice-my-board: 20;
   --combat-slice-cockpit: 30;
+
+  /* Biopunk / Terminal de campo */
+  --biopunk-amber: #f59e0b;
+  --biopunk-amber-dim: #b45309;
+  --biopunk-cyan: #22d3ee;
+  --biopunk-cyan-dim: #0891b2;
+  --biopunk-toxic: #10b981;
+  --biopunk-toxic-dim: #047857;
+  --biopunk-metal: #3f3f46;
+  --biopunk-metal-light: #52525b;
+  --biopunk-metal-dark: #27272a;
+  --biopunk-glass: rgba(63, 63, 70, 0.6);
+  --biopunk-glow-amber: 0 0 20px rgba(245, 158, 11, 0.5), 0 0 40px rgba(245, 158, 11, 0.2);
+  --biopunk-glow-cyan: 0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(34, 211, 238, 0.2);
+  --biopunk-glow-toxic: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.15);
 }
 
 @theme inline {
@@ -71,6 +86,44 @@ body {
     linear-gradient(rgba(34, 211, 238, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(34, 211, 238, 0.08) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+/* CRT reutilizável (curvatura, scanlines, opcional cintilação) */
+.crt-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.12) 2px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+}
+.crt-container {
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(34, 211, 238, 0.15);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .crt-flicker {
+    animation: crt-flicker 4s ease-in-out infinite;
+  }
+}
+@keyframes crt-flicker {
+  0%, 90%, 100% { opacity: 1; }
+  92% { opacity: 0.98; }
+  94% { opacity: 1; }
+  96% { opacity: 0.99; }
+}
+
+/* Painel de metal (fundo texturizado) */
+.biopunk-panel-metal {
+  background:
+    linear-gradient(145deg, var(--biopunk-metal-dark) 0%, var(--biopunk-metal) 50%, var(--biopunk-metal-dark) 100%);
+  border: 2px solid var(--biopunk-metal-light);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* Slider seringa: bolhas no líquido */

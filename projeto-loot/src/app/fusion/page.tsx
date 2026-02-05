@@ -74,9 +74,18 @@ export default async function FusionPage() {
   });
 
   return (
-    <main className="fusion-lab-page relative min-h-screen bg-black px-4 py-8 text-zinc-100 sm:px-6">
-      <div className="fusion-scanline absolute inset-0 pointer-events-none opacity-[0.03]" aria-hidden />
-      <div className="fusion-grid-pattern absolute inset-0 pointer-events-none opacity-[0.06]" aria-hidden />
+    <main className="fusion-lab-page relative min-h-screen overflow-hidden px-4 py-8 text-zinc-100 sm:px-6">
+      {/* Cenário reator: maquinaria em profundidade */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden
+        style={{
+          background:
+            "radial-gradient(ellipse 120% 80% at 50% 120%, rgba(34, 211, 238, 0.08) 0%, transparent 50%), radial-gradient(ellipse 80% 60% at 50% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 45%), linear-gradient(180deg, #0c0c0e 0%, #0f0f12 30%, #0a0a0c 100%)",
+        }}
+      />
+      <div className="fusion-grid-pattern absolute inset-0 pointer-events-none opacity-[0.12]" aria-hidden />
+      <div className="crt-scanlines absolute inset-0 pointer-events-none opacity-[0.04]" aria-hidden />
       <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-8">
         <nav className="flex items-center gap-2 text-sm text-zinc-500">
           <Link href="/" className="hover:text-zinc-300">

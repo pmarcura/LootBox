@@ -55,7 +55,7 @@ Acesse o app em deploy (ex.: Vercel), crie sua conta e:
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sua_publishable_key
    SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
    ```
-   Opcional para produção: `NEXT_PUBLIC_SITE_URL`, `DATABASE_URL` (Drizzle). Veja `.env.example`.
+   Para **produção** (ex.: Vercel), configure também no painel do deploy: `DATABASE_URL` (connection string do Supabase, pooler) e, se quiser, `NEXT_PUBLIC_SITE_URL`. Veja `.env.example`.
 
 4. Aplique migrações no banco (via Supabase Dashboard ou MCP; ver [API_E_MCP.md](docs/API_E_MCP.md)).
 5. Rode o seed e o app:
@@ -73,6 +73,19 @@ Acesse o app em deploy (ex.: Vercel), crie sua conta e:
 | `npm run check` | Lint + typecheck |
 | `npm run test:run` | Testes unitários (Vitest) |
 | `npm run predeploy` | Build (recomendado antes de push para `main`) |
+
+### Deploy (ex.: Vercel)
+
+Configure no projeto (ex.: Vercel → Settings → Environment Variables) as mesmas variáveis do `.env.local`, em especial:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (ou `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+- `SUPABASE_SERVICE_ROLE_KEY`
+- **`DATABASE_URL`** — connection string do Postgres (Supabase: Settings → Database → Connection string; use **pooler**). Sem isso, inventário, fusão, resgate e marketplace falham em produção.
+
+### Troubleshooting
+
+- **`webpage_content_reporter.js`: Unexpected token 'export'** — Esse erro vem de scripts injetados por **extensões do navegador** (ex.: Cursor, ferramentas de acessibilidade), não do app. Pode ignorar ao depurar o Gênesis; para confirmar, teste em janela anônima sem extensões.
 
 ### Documentação
 
