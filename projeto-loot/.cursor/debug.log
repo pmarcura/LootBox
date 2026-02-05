@@ -1,0 +1,16 @@
+{"location":"dissolve.ts:entry","message":"dissolveAction called","data":{"rawIds":"66b93c13-415b-4428-834d-7d3e776df893","parsedOk":true},"hypothesisId":"H1","timestamp":1770239846594,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterAuth","message":"getDbWithAuth ok","data":{"userId":"8f827e7b","idsCount":1},"hypothesisId":"H4","timestamp":1770239846715,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterConsumed","message":"consumedIds query ok","data":{"consumedCount":1},"hypothesisId":"H3","timestamp":1770239846931,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterRows","message":"allRows and filter ok","data":{"allRowsCount":1,"rowsCount":1,"idsCount":1},"hypothesisId":"H3","timestamp":1770239846957,"sessionId":"debug-session"}
+{"location":"dissolve.ts:entry","message":"dissolveAction called","data":{"rawIds":"2e2388e4-3334-48f0-a88a-01815b4aef61","parsedOk":true},"hypothesisId":"H1","timestamp":1770240254353,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterAuth","message":"getDbWithAuth ok","data":{"userId":"8f827e7b","idsCount":1},"hypothesisId":"H4","timestamp":1770240254423,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterConsumed","message":"consumedIds query ok","data":{"consumedCount":3},"hypothesisId":"H3","timestamp":1770240254675,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterRows","message":"allRows and filter ok","data":{"allRowsCount":1,"rowsCount":1,"idsCount":1},"hypothesisId":"H3","timestamp":1770240254706,"sessionId":"debug-session"}
+{"location":"dissolve.ts:entry","message":"dissolveAction called","data":{"rawIds":"e9500e3d-bf7a-4b78-8b28-ad20c0514dc0","parsedOk":true},"hypothesisId":"H1","timestamp":1770240262003,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterAuth","message":"getDbWithAuth ok","data":{"userId":"8f827e7b","idsCount":1},"hypothesisId":"H4","timestamp":1770240262152,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterConsumed","message":"consumedIds query ok","data":{"consumedCount":4},"hypothesisId":"H3","timestamp":1770240262292,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterRows","message":"allRows and filter ok","data":{"allRowsCount":1,"rowsCount":1,"idsCount":1},"hypothesisId":"H3","timestamp":1770240262324,"sessionId":"debug-session"}
+{"location":"dissolve.ts:entry","message":"dissolveAction called","data":{"rawIds":"3339b86d-34c2-4750-b4c9-5fc9f7e20ec6,1089dd1d-b100-41fa-8d83-80a33330facd","parsedOk":true},"hypothesisId":"H1","timestamp":1770246507101,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterAuth","message":"getDbWithAuth ok","data":{"userId":"8f827e7b","idsCount":2},"hypothesisId":"H4","timestamp":1770246507192,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterConsumed","message":"consumedIds query ok","data":{"consumedCount":11},"hypothesisId":"H3","timestamp":1770246507401,"sessionId":"debug-session"}
+{"location":"dissolve.ts:afterRows","message":"allRows and filter ok","data":{"allRowsCount":2,"rowsCount":2,"idsCount":2},"hypothesisId":"H3","timestamp":1770246507428,"sessionId":"debug-session"}
