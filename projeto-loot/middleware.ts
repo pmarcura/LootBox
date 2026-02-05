@@ -3,6 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabaseEnv } from "./src/lib/supabase/env";
 
+/** Same-Site cookies para Safari ITP; auth no mesmo domínio do app. */
+const SESSION_COOKIE_OPTIONS = {
+  path: "/",
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+};
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -11,6 +18,7 @@ export async function middleware(request: NextRequest) {
   const { url, anonKey } = getSupabaseEnv();
 
   const supabase = createServerClient(url, anonKey, {
+    cookieOptions: SESSION_COOKIE_OPTIONS,
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -23,7 +31,10 @@ export async function middleware(request: NextRequest) {
           request,
         });
         cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options),
+          supabaseResponse.cookies.set(name, value, {
+            ...SESSION_COOKIE_OPTIONS,
+            ...options,
+          }),
         );
       },
     },

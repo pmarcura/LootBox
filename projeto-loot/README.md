@@ -85,6 +85,15 @@ Configure no projeto (ex.: Vercel → Settings → Environment Variables) as mes
 
 **Login com Google:** No Supabase → Authentication → URL Configuration, adicione em **Redirect URLs** a URL do seu deploy, por exemplo `https://seudominio.com/auth/callback` (e, se usar previews, `https://*-seu-projeto.vercel.app/auth/callback`). Assim o OAuth redireciona para o mesmo domínio e evita loop de login.
 
+### Safari / ITP (Intelligent Tracking Prevention)
+
+O Safari bloqueia cookies de terceiros. Para evitar logout ao fechar o browser ou em mobile:
+
+- **Auth no mesmo domínio:** O login e o app rodam no **mesmo domínio** (ex.: `seudominio.com`). Não use `auth.seudominio.com` para login e `app.seudominio.com` para o app — isso vira contexto de terceiros e o ITP pode apagar a sessão.
+- **Cookies Same-Site:** O projeto já usa cookies com `SameSite=Lax`, `path=/` e `Secure` em produção (servidor e middleware). Assim a sessão é first-party e tende a persistir no Safari.
+
+Se no futuro precisar de subdomínios, avalie armazenar o token no `localStorage` no cliente (com proteções contra XSS) ou manter um único domínio para auth + app.
+
 ### Troubleshooting
 
 - **`webpage_content_reporter.js`: Unexpected token 'export'** — Esse erro vem de scripts injetados por **extensões do navegador** (ex.: Cursor, ferramentas de acessibilidade), não do app. Pode ignorar ao depurar o Gênesis; para confirmar, teste em janela anônima sem extensões.
