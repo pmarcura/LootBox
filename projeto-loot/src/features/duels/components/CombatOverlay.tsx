@@ -180,6 +180,19 @@ export function CombatOverlay({
   const durationMs = speed === 2 ? baseDurationMs / 2 : baseDurationMs;
   const gapMs = speed === 2 ? GAP_MS / 2 : GAP_MS;
 
+  const [slotRects, setSlotRects] = React.useState<Record<string, DOMRect>>({});
+
+  const updateSlotRects = React.useCallback(() => {
+    const next: Record<string, DOMRect> = {};
+    for (const owner of ["player1", "player2"] as const) {
+      for (let lane = 1; lane <= 3; lane++) {
+        const r = getRect(getSlotSelector(owner, lane));
+        if (r) next[`${owner}-${lane}`] = r;
+      }
+    }
+    setSlotRects((prev) => (Object.keys(next).length === 0 ? prev : { ...prev, ...next }));
+  }, []);
+
   React.useEffect(() => {
     if (events.length === 0) return;
     setSpeed(1);
@@ -191,11 +204,30 @@ export function CombatOverlay({
     return () => clearTimeout(t);
   }, [events.length]);
 
-  const rect = React.useCallback((owner: "player1" | "player2", lane: number): DOMRect | undefined => {
-    if (!ready) return undefined;
-    const r = getRect(getSlotSelector(owner, lane));
-    return r ?? undefined;
-  }, [ready]);
+  React.useEffect(() => {
+    if (!ready) return;
+    updateSlotRects();
+    const scrollContainers = document.querySelectorAll(".overflow-auto, .overflow-y-auto");
+    const onScroll = () => updateSlotRects();
+    scrollContainers.forEach((el) => el.addEventListener("scroll", onScroll, { passive: true }));
+    window.addEventListener("resize", updateSlotRects);
+    return () => {
+      scrollContainers.forEach((el) => el.removeEventListener("scroll", onScroll));
+      window.removeEventListener("resize", updateSlotRects);
+    };
+  }, [ready, updateSlotRects]);
+
+  const rect = React.useCallback(
+    (owner: "player1" | "player2", lane: number): DOMRect | undefined => {
+      if (!ready) return undefined;
+      const key = `${owner}-${lane}`;
+      const fromState = slotRects[key];
+      if (fromState) return fromState;
+      const r = getRect(getSlotSelector(owner, lane));
+      return r ?? undefined;
+    },
+    [ready, slotRects]
+  );
 
   const onCompleteRef = React.useRef(onComplete);
   const onEventFocusRef = React.useRef(onEventFocus);

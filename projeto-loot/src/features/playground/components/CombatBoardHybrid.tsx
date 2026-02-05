@@ -26,7 +26,7 @@ import { AnimatedLifeBar } from "./AnimatedLifeBar";
 import { HeartIcon, AttackIcon } from "@/features/duels/components/CombatIcons";
 import { AttackTokenIndicator } from "./AttackTokenIndicator";
 import { KeywordIcon } from "./KeywordIcons";
-import { CombatPreviewOverlay, useCombatPreview } from "./CombatPreviewOverlay";
+import { useCombatPreview } from "./CombatPreviewOverlay";
 import { EngagementLines } from "./EngagementLines";
 import { CombatHistoryLog } from "./CombatHistoryLog";
 import { Skull } from "lucide-react";
@@ -637,7 +637,6 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
         attackerSide={matchState.attackToken ?? "player1"}
         defenderSide={matchState.attackToken === "player1" ? "player2" : "player1"}
       />
-      <CombatPreviewOverlay matchState={matchState} phase={phase} />
 
       {previewPopoverSlot != null && (() => {
         const p = slotPreviews.find((x) => x.slot === previewPopoverSlot);
@@ -709,11 +708,14 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                 (phase === "defender_reaction" || phase === "attack_declared") &&
                 attackSlots.includes(lane) &&
                 matchState.attackToken !== oppRole;
+              const oppPreview = oppBoardBySlot[i]
+                ? combatPreviewMap[oppBoardBySlot[i]!.match_card_id]
+                : undefined;
               return (
               <motion.div
                 key={i}
                 data-combat-slot={`${oppRole}-${lane}`}
-                className={isActiveLane ? "rounded-xl ring-2 ring-amber-400 ring-offset-2 ring-offset-zinc-900 transition-all" : ""}
+                className={`relative ${isActiveLane ? "rounded-xl ring-2 ring-amber-400 ring-offset-2 ring-offset-zinc-900 transition-all" : ""}`}
                 animate={
                   isAttackingSlot
                     ? { y: [0, -6], transition: { duration: 0.3 } }
@@ -722,14 +724,20 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                       : undefined
                 }
               >
+                {isDefendingSlot && oppPreview && (
+                  <div
+                    className={`pointer-events-none absolute inset-0 z-10 rounded-xl border-2 ${
+                      oppPreview.dies
+                        ? "border-red-400/80 shadow-[0_0_12px_rgba(248,113,113,0.35)]"
+                        : "border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.25)]"
+                    }`}
+                    aria-hidden
+                  />
+                )}
                 <SlotCard
                   card={oppBoardBySlot[i]}
                   keyword={oppBoardBySlot[i]?.keyword ?? ""}
-                  combatPreview={
-                    oppBoardBySlot[i]
-                      ? combatPreviewMap[oppBoardBySlot[i]!.match_card_id]
-                      : undefined
-                  }
+                  combatPreview={oppPreview}
                   displayHp={oppBoardBySlot[i] && combatEvents ? liveHpMap[oppBoardBySlot[i]!.match_card_id] : undefined}
                   testId={`playground-slot-opp-${i + 1}`}
                 />
@@ -778,6 +786,9 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                 attackSlots.includes(slot) &&
                 matchState.attackToken !== myRole;
               const showPreviewOnTap = isDefendingSlot && slotPreviews.some((x) => x.slot === slot);
+              const myPreview = myBoardBySlot[i]
+                ? combatPreviewMap[myBoardBySlot[i]!.match_card_id]
+                : undefined;
               return (
                 <div
                   key={i}
@@ -785,9 +796,20 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                     slotRefs.current[i] = el;
                   }}
                   data-combat-slot={`${myRole}-${slot}`}
-                  className={isActiveLane ? "rounded-xl ring-2 ring-amber-400 ring-offset-2 ring-offset-zinc-900 transition-all" : ""}
+                  className={`relative ${isActiveLane ? "rounded-xl ring-2 ring-amber-400 ring-offset-2 ring-offset-zinc-900 transition-all" : ""}`}
                 >
+                  {isDefendingSlot && myPreview && (
+                    <div
+                      className={`pointer-events-none absolute inset-0 z-10 rounded-xl border-2 ${
+                        myPreview.dies
+                          ? "border-red-400/80 shadow-[0_0_12px_rgba(248,113,113,0.35)]"
+                          : "border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.25)]"
+                      }`}
+                      aria-hidden
+                    />
+                  )}
                   <motion.div
+                    className="relative"
                     animate={
                       isAttackingSlot
                         ? { y: [0, 6], transition: { duration: 0.3 } }
@@ -814,6 +836,7 @@ export function CombatBoardHybrid({ onBack }: CombatBoardHybridProps) {
                     isTarget={isTarget}
                     onClick={isTarget && playTarget ? () => handlePlayCard(playTarget, slot) : undefined}
                     isSpawning={!!(lastPlayed && myBoardBySlot[i]?.match_card_id === lastPlayed.cardId)}
+                    combatPreview={myPreview}
                     testId={`playground-slot-${slot}`}
                   />
                   </motion.div>
