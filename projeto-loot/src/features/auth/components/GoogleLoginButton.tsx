@@ -17,10 +17,16 @@ export function GoogleLoginButton({ redirectTo = "/gacha" }: GoogleLoginButtonPr
     setLoading(true);
     try {
       const supabase = createSupabaseBrowserClient();
-      const baseUrl =
-        process.env.NEXT_PUBLIC_SITE_URL ||
-        (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
-      const callbackUrl = `${baseUrl.replace(/\/$/, "")}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
+      // Callback deve ser sempre a origem do APP (onde está o /auth/callback), nunca a URL do Supabase.
+      let baseUrl =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+      if (typeof baseUrl === "string" && baseUrl.includes("supabase.co")) {
+        baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+      }
+      baseUrl = (baseUrl || "http://localhost:3000").replace(/\/$/, "");
+      const callbackUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
       const { error: err } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: callbackUrl },
