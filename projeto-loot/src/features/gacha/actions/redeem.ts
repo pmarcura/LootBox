@@ -23,14 +23,22 @@ import type {
   StrainDropItem,
 } from "../types";
 
-/** Converte URL relativa da imagem em absoluta para funcionar no Vercel e em SSR. */
+/**
+ * Converte URL relativa em absoluta quando necessário (evita CORS: usar mesma origem).
+ * Preferir VERCEL_URL (deploy atual) para imagens carregadas no cliente.
+ * Nunca adiciona barra dupla: base é normalizada sem trailing slash.
+ */
 function toAbsoluteImageUrl(url: string | null | undefined): string | undefined {
   if (url == null || url === "") return undefined;
   if (url.startsWith("http")) return url;
   const base =
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ??
     process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
-  return base ? base + url : url;
+    undefined;
+  if (!base) return url;
+  const baseNorm = base.replace(/\/$/, "");
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return baseNorm + path;
 }
 
 const GACHA_PROBS = {
@@ -330,7 +338,7 @@ export async function redeemAction(
             collectibleName: result.vessel.collectibleName,
             collectibleSlug: result.vessel.collectibleSlug,
             rarity: result.vessel.rarity as RedemptionItem["rarity"],
-            imageUrl: toAbsoluteImageUrl(result.vessel.imageUrl) ?? result.vessel.imageUrl,
+            imageUrl: result.vessel.imageUrl ?? undefined,
             baseHp: result.vessel.baseHp,
             baseAtk: result.vessel.baseAtk,
             baseMana: result.vessel.baseMana,
@@ -342,7 +350,7 @@ export async function redeemAction(
             slug: result.strain.slug,
             rarity: result.strain.rarity as StrainDropItem["rarity"],
             family: result.strain.family as StrainDropItem["family"],
-            imageUrl: toAbsoluteImageUrl(result.strain.imageUrl) ?? result.strain.imageUrl,
+            imageUrl: result.strain.imageUrl ?? undefined,
           },
         });
       } catch (err) {

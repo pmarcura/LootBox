@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Heart, Sword, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/Badge";
+import { toSameOriginImageUrl } from "@/lib/catalog-image";
 import { getStrainFamilyDisplay } from "@/lib/strain-family";
 import { KeywordIcon } from "@/features/playground/components/KeywordIcons";
 import { RarityLevelIcon } from "@/features/inventory/components/RarityLevelIcon";
@@ -77,12 +78,12 @@ function VesselDetailCard({
         <div className="relative min-h-[140px] w-full shrink-0 overflow-hidden rounded-t-lg bg-[var(--biopunk-metal-dark)] aspect-[2816/1536]">
           {imageUrl ? (
             <Image
-              src={imageUrl}
+              src={toSameOriginImageUrl(imageUrl)}
               alt={name}
               fill
               className="object-contain"
               sizes="(max-width: 640px) 100vw, 320px"
-              unoptimized={imageUrl.startsWith("/")}
+              unoptimized={imageUrl.startsWith("/") || imageUrl.startsWith("data:")}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-zinc-500">
@@ -147,12 +148,12 @@ function StrainDetailCard({
         <div className="relative min-h-[140px] w-full shrink-0 overflow-hidden rounded-t-lg bg-[var(--biopunk-metal-dark)] aspect-[2816/1536]">
           {imageUrl ? (
             <Image
-              src={imageUrl}
+              src={toSameOriginImageUrl(imageUrl)}
               alt={name}
               fill
               className="object-contain"
               sizes="(max-width: 640px) 100vw, 320px"
-              unoptimized={imageUrl.startsWith("/")}
+              unoptimized={imageUrl.startsWith("/") || imageUrl.startsWith("data:")}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-zinc-500">
@@ -179,13 +180,13 @@ function FusedCardDetail({ card }: { card: FusedCardData }) {
     <article className="flex flex-col overflow-hidden rounded-2xl border-2 border-[var(--biopunk-cyan)]/50 bg-[var(--biopunk-metal-dark)] shadow-[var(--biopunk-glow-cyan)]">
       <div className="relative aspect-[2816/1536] w-full shrink-0 overflow-hidden bg-[var(--biopunk-metal-dark)]">
         {card.imageUrl ? (
-          <Image
-            src={card.imageUrl}
+            <Image
+              src={toSameOriginImageUrl(card.imageUrl)}
             alt={card.name}
             fill
             className="object-contain"
             sizes="(max-width: 640px) 100vw, 360px"
-            unoptimized={card.imageUrl.startsWith("/")}
+            unoptimized={card.imageUrl.startsWith("/") || card.imageUrl.startsWith("data:")}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-zinc-500">

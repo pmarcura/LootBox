@@ -12,16 +12,20 @@ type SoundLibrary = {
   reveal: Record<Rarity, Howl | null>;
 };
 
-/** Creates a Howl instance; returns null if file is missing or load fails (graceful degradation) */
+/** Data URI de áudio silencioso (WAV mínimo); evita 404 quando os MP3 não estão em public/sounds. */
+const SILENT_DATA_URI =
+  "data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAAABmYWN0BAAAAAAAAABkYXRhAAAAAA==";
+
+/** Creates a Howl instance; returns null if file is missing or load fails (graceful degradation). */
 function createSoundSafe(src: string): Howl | null {
   try {
     return new Howl({
-      src: [src],
+      src: [src, SILENT_DATA_URI],
       preload: true,
       volume: 0.6,
-      onloaderror: () => {
+      onloaderror: (_id, err) => {
         if (process.env.NODE_ENV === "development") {
-          console.warn(`[RevealAudio] Failed to load: ${src}`);
+          console.warn(`[RevealAudio] Failed to load: ${src}`, err);
         }
       },
     });

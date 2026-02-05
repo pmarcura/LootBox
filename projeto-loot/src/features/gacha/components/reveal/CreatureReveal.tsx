@@ -9,6 +9,7 @@ import * as THREE from "three";
 import type { RevealPhase } from "../../constants/rarityConfig";
 import type { Rarity } from "../../types";
 import { RARITY_CONFIG, getMaxRarity } from "../../constants/rarityConfig";
+import { toSameOriginImageUrl } from "@/lib/catalog-image";
 import { createRoundParticleTexture } from "./utils/roundParticleTexture";
 
 type RevealItem = { name: string; rarity: Rarity; imageUrl?: string };
@@ -82,16 +83,14 @@ function CardWithTexture({
   showShowcase?: boolean;
 }) {
   const config = RARITY_CONFIG[rarity];
-  const baseUrl =
+  const origin =
     typeof window !== "undefined"
       ? window.location.origin
-      : process.env.NEXT_PUBLIC_SITE_URL ?? "";
+      : (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "") || "";
   const url =
-    imageUrl.startsWith("/") && baseUrl
-      ? baseUrl + imageUrl
-      : imageUrl.startsWith("http")
-        ? imageUrl
-        : imageUrl;
+    imageUrl.startsWith("/") && origin
+      ? origin + imageUrl
+      : toSameOriginImageUrl(imageUrl);
   const texture = useTexture(url);
   const meshRef = useRef<THREE.Mesh>(null);
 
