@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, useEffect } from "react";
+import { memo, useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useSpring, animated } from "@react-spring/three";
 import { RoundedBox } from "@react-three/drei";
@@ -19,7 +19,7 @@ type ContainmentCellProps = {
   onShatterComplete: () => void;
 };
 
-export function ContainmentCell({
+export const ContainmentCell = memo(function ContainmentCell({
   phase,
   rarity,
   crackIntensity,
@@ -171,4 +171,4 @@ export function ContainmentCell({
       </group>
     </animated.group>
   );
-}
+});

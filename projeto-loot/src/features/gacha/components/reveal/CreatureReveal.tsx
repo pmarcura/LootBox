@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, Suspense, useCallback } from "react";
+import { memo, useRef, useMemo, Suspense, useCallback } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useSpring, animated } from "@react-spring/three";
 import { Float, useTexture, MeshReflectorMaterial } from "@react-three/drei";
@@ -26,6 +26,8 @@ type CreatureRevealProps = {
   focusedCard?: FocusedCard;
   /** Callback quando o usuário clica numa carta (só no showcase) */
   onFocusCard?: (card: "vessel" | "strain") => void;
+  /** Modo de baixa performance: reduz resolução do reflector */
+  lowEnd?: boolean;
 };
 
 const SLOT_OFFSET = 1.05;
@@ -166,13 +168,14 @@ function CardFallback({
 
 const CENTER_POS: [number, number, number] = [0, 0.3, 0];
 
-export function CreatureReveal({
+export const CreatureReveal = memo(function CreatureReveal({
   phase,
   vessel,
   strain,
   showShowcase = false,
   focusedCard = "both",
   onFocusCard,
+  lowEnd = false,
 }: CreatureRevealProps) {
   const maxRarity = useMemo(
     () => (strain ? getMaxRarity(vessel.rarity, strain.rarity) : vessel.rarity),
@@ -183,14 +186,16 @@ export function CreatureReveal({
   const isVisible = phase === "reveal" || phase === "complete";
   const singleCard = !strain;
 
-  const { scale, positionY } = useSpring({
+  const { scale, positionY, opacity } = useSpring({
     scale: isVisible ? 1 : 0,
-    positionY: isVisible ? 0 : -2,
+    positionY: isVisible ? 0 : -3,
+    opacity: isVisible ? 1 : 0,
     config: {
-      mass: 1,
-      tension: 150,
-      friction: 20,
+      mass: 1.2,
+      tension: 80, // mais lento para transição suave
+      friction: 18,
     },
+    delay: isVisible ? 200 : 0, // pequeno delay para sincronizar com explosão
   });
 
   useFrame((state) => {
@@ -289,14 +294,14 @@ export function CreatureReveal({
         </group>
       )}
 
-      <FogParticles color={maxConfig.glowColor} showShowcase={showFog} />
+      <FogParticles color={maxConfig.glowColor} showShowcase={showFog} lowEnd={lowEnd} />
 
       {/* Reflective floor so cards reflect */}
       <mesh position={[0, -1.35, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[3, 32]} />
         <MeshReflectorMaterial
-          blur={[200, 100]}
-          resolution={showShowcase ? 1536 : 1024}
+          blur={lowEnd ? [100, 50] : [200, 100]}
+          resolution={lowEnd ? 512 : (showShowcase ? 1536 : 1024)}
           mixBlur={0.5}
           mixStrength={showShowcase ? 0.5 : 0.4}
           roughness={0.3}
@@ -345,10 +350,10 @@ export function CreatureReveal({
       />
     </animated.group>
   );
-}
+});
 
-function FogParticles({ color, showShowcase }: { color: string; showShowcase?: boolean }) {
-  const count = showShowcase ? 50 : 35;
+function FogParticles({ color, showShowcase, lowEnd = false }: { color: string; showShowcase?: boolean; lowEnd?: boolean }) {
+  const count = lowEnd ? (showShowcase ? 25 : 18) : (showShowcase ? 50 : 35);
   const size = showShowcase ? 0.1 : 0.08;
   const roundTexture = useMemo(() => createRoundParticleTexture(), []);
   const positions = useMemo(() => {

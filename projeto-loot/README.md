@@ -83,7 +83,7 @@ Configure no projeto (ex.: Vercel → Settings → Environment Variables) as mes
 - `SUPABASE_SERVICE_ROLE_KEY`
 - **`DATABASE_URL`** — connection string do Postgres (Supabase: Settings → Database → Connection string; use **pooler**). Sem isso, inventário, fusão, resgate e marketplace falham em produção.
 
-**Login com Google:** No Supabase → Authentication → URL Configuration, adicione em **Redirect URLs** a URL do app, por exemplo `https://genesis-gilt-chi.vercel.app/auth/callback` (e previews se precisar: `https://*-seu-projeto.vercel.app/auth/callback`). **Site URL** pode ser `https://genesis-gilt-chi.vercel.app`.
+**Login com Google:** No Supabase → Authentication → URL Configuration, em **Redirect URLs** use a URL **completa com `https://`** (ex: `https://genesis-gilt-chi.vercel.app/auth/callback`). Se faltar o protocolo, o Supabase redireciona para `supabase.co/genesis-gilt-chi.vercel.app` e dá "requested path is invalid". **Site URL** também com `https://`: `https://genesis-gilt-chi.vercel.app`.
 
 ### Safari / ITP (Intelligent Tracking Prevention)
 

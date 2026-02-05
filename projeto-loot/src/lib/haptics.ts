@@ -14,9 +14,3 @@ export function vibrateHeavy(): void {
     navigator.vibrate([80, 40, 80]);
   }
 }
-
-export function vibratePattern(pattern: number | number[]): void {
-  if (typeof navigator !== "undefined" && navigator.vibrate) {
-    navigator.vibrate(pattern);
-  }
-}

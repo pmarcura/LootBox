@@ -17,15 +17,18 @@ export function GoogleLoginButton({ redirectTo = "/gacha" }: GoogleLoginButtonPr
     setLoading(true);
     try {
       const supabase = createSupabaseBrowserClient();
-      // Callback deve ser sempre a origem do APP (onde está o /auth/callback), nunca a URL do Supabase.
+      // Callback deve ser URL absoluta (com https://). Sem protocolo, o Supabase trata como path e redireciona para supabase.co/genesis-gilt-chi.vercel.app → "requested path is invalid".
       let baseUrl =
         typeof window !== "undefined"
           ? window.location.origin
-          : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+          : process.env.NEXT_PUBLIC_SITE_URL || "https://genesis-gilt-chi.vercel.app";
       if (typeof baseUrl === "string" && baseUrl.includes("supabase.co")) {
-        baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+        baseUrl = typeof window !== "undefined" ? window.location.origin : "https://genesis-gilt-chi.vercel.app";
       }
-      baseUrl = (baseUrl || "http://localhost:3000").replace(/\/$/, "");
+      baseUrl = (baseUrl || "https://genesis-gilt-chi.vercel.app").replace(/\/$/, "");
+      if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+        baseUrl = `https://${baseUrl}`;
+      }
       const callbackUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
       const { error: err } = await supabase.auth.signInWithOAuth({
         provider: "google",

@@ -28,7 +28,13 @@ export function RedeemForm() {
     initialState,
   );
   const [revealDrops, setRevealDrops] = React.useState<DropResult[] | null>(null);
+  const [inputValue, setInputValue] = React.useState("");
   const formRef = React.useRef<HTMLFormElement>(null);
+
+  // Conta códigos válidos (12 caracteres)
+  const codes = inputValue.split(/[\n,\s]+/).filter(Boolean);
+  const validCount = codes.filter((c) => c.length === 12).length;
+  const hasValidCodes = validCount > 0;
 
   // When redemption succeeds, show the reveal experience (usa primeiro drop para 3D)
   React.useEffect(() => {
@@ -39,6 +45,7 @@ export function RedeemForm() {
 
   const handleRevealComplete = React.useCallback(() => {
     setRevealDrops(null);
+    setInputValue("");
     formRef.current?.reset();
   }, []);
 
@@ -47,10 +54,17 @@ export function RedeemForm() {
       <div className="space-y-6">
         <form ref={formRef} action={formAction} className="flex flex-col gap-4">
           <label htmlFor="redeem-codes" className="flex w-full flex-col gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Códigos do kit (até 5)
+            <span className="flex items-center justify-between">
+              <span>Códigos do kit (até 5)</span>
+              <span className={`text-xs ${hasValidCodes ? "text-emerald-500" : "text-zinc-400"}`}>
+                {validCount}/5 válidos
+              </span>
+            </span>
             <textarea
               id="redeem-codes"
               name="codes"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value.toUpperCase())}
               placeholder="Um código por linha ou separados por vírgula (máx. 5). Ex: 2GYKCKHXJ6S6"
               autoComplete="off"
               rows={3}
@@ -59,7 +73,11 @@ export function RedeemForm() {
               aria-invalid={state.status === "error"}
             />
           </label>
-          <Button type="submit" disabled={isPending}>
+          <Button 
+            type="submit" 
+            disabled={isPending || !hasValidCodes}
+            className="bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 disabled:bg-zinc-300 dark:disabled:bg-zinc-700"
+          >
             {isPending ? "Resgatando..." : "Resgatar"}
           </Button>
         </form>

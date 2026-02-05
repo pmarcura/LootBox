@@ -2,19 +2,31 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useTexture } from "@react-three/drei";
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { getStrainFamilyDisplay } from "@/lib/strain-family";
+import { toSameOriginImageUrl } from "@/lib/catalog-image";
 import type { DropResult, Rarity } from "../../types";
 import type { RevealPhase } from "../../constants/rarityConfig";
 import { PHASE_DURATIONS, getMaxRarity } from "../../constants/rarityConfig";
 import { useRevealAudio } from "../../hooks/useRevealAudio";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { useHapticFeedback } from "../../hooks/useHapticFeedback";
 import { RevealCanvas } from "./RevealCanvas";
 import { RevealScene } from "./RevealScene";
 import { CardDetailView } from "./CardDetailView";
+import { ProgressIndicator } from "./ProgressIndicator";
 import type { FocusedCard } from "./CreatureReveal";
+
+/** Converte imageUrl para URL absoluta same-origin para preload. */
+function getPreloadUrl(imageUrl?: string): string | null {
+  if (!imageUrl) return null;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  if (imageUrl.startsWith("/") && origin) return origin + imageUrl;
+  return toSameOriginImageUrl(imageUrl);
+}
 
 const RARITY_LABELS: Record<Rarity, string> = {
   common: "Comum",
@@ -61,25 +73,83 @@ export function RevealExperience({ drops, onComplete }: RevealExperienceProps) {
   const [showShowcase, setShowShowcase] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard>("both");
+  const [texturesReady, setTexturesReady] = useState(false);
+  const [clickProgress, setClickProgress] = useState({ clickCount: 0, maxClicks: 3 });
   const audio = useRevealAudio();
+  const haptic = useHapticFeedback();
   const prefersReducedMotion = useReducedMotion();
   const skipButtonRef = useRef<HTMLButtonElement>(null);
+
+  const maxRarity = getMaxRarity(drop.vessel.rarity, drop.strain.rarity);
 
   const handleFocusCard = useCallback((card: "vessel" | "strain") => {
     setFocusedCard(card);
   }, []);
   const handleFocusBoth = useCallback(() => setFocusedCard("both"), []);
 
-  // Início: ritual. Ao completar reveal → showcase 3D (carta sai da caixa, girar/zoom). Continuar → tela de detalhes.
+  // Recebe progresso de cliques do RevealScene
+  const handleProgressUpdate = useCallback((clickCount: number, maxClicks: number) => {
+    setClickProgress({ clickCount, maxClicks });
+  }, []);
+
+  // Preload de texturas: carrega antes de iniciar a animação
+  useEffect(() => {
+    const urls: string[] = [];
+    for (const d of drops) {
+      const vesselUrl = getPreloadUrl(d.vessel.imageUrl);
+      const strainUrl = getPreloadUrl(d.strain.imageUrl);
+      if (vesselUrl) urls.push(vesselUrl);
+      if (strainUrl) urls.push(strainUrl);
+    }
+    if (urls.length === 0) {
+      setTexturesReady(true);
+      return;
+    }
+    // Preload usando drei's useTexture.preload (cache de textura)
+    urls.forEach((url) => {
+      try {
+        useTexture.preload(url);
+      } catch {
+        // Ignorar erros de preload
+      }
+    });
+    // Fallback: marcar como pronto após timeout ou quando imagens carregam
+    let loaded = 0;
+    const checkReady = () => {
+      loaded++;
+      if (loaded >= urls.length) setTexturesReady(true);
+    };
+    const images = urls.map((url) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = checkReady;
+      img.onerror = checkReady;
+      img.src = url;
+      return img;
+    });
+    // Timeout de segurança: 5s máx
+    const timeout = setTimeout(() => setTexturesReady(true), 5000);
+    return () => {
+      clearTimeout(timeout);
+      images.forEach((img) => {
+        img.onload = null;
+        img.onerror = null;
+      });
+    };
+  }, [drops]);
+
+  // Início: ritual. Ao completar reveal → showcase 3D. Aguarda texturas prontas.
   useEffect(() => {
     if (prefersReducedMotion) {
       setPhase("complete");
       setShowShowcase(true);
       return;
     }
+    // Só inicia ritual quando texturas estão prontas
+    if (!texturesReady) return;
     const timer = setTimeout(() => setPhase("ritual"), 300);
     return () => clearTimeout(timer);
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, texturesReady]);
 
   const handlePhaseComplete = useCallback(
     (nextPhase: RevealPhase) => {
@@ -87,15 +157,24 @@ export function RevealExperience({ drops, onComplete }: RevealExperienceProps) {
       switch (nextPhase) {
         case "fight":
           audio.playCellLand();
+          haptic.vibrateMedium();
           break;
         case "drumroll":
           audio.playEnergyBuildup();
+          haptic.vibrateDrumroll();
           break;
         case "reveal":
           audio.stopEnergyBuildup();
           audio.playShatter();
-          const maxRarity = getMaxRarity(drop.vessel.rarity, drop.strain.rarity);
-          setTimeout(() => audio.playReveal(maxRarity), 500);
+          haptic.vibrateHeavy();
+          const revealRarity = getMaxRarity(drop.vessel.rarity, drop.strain.rarity);
+          setTimeout(() => {
+            audio.playReveal(revealRarity);
+            // Vibração épica para raridades altas
+            if (revealRarity === "legendary" || revealRarity === "epic") {
+              haptic.vibrateEpic();
+            }
+          }, 500);
           setTimeout(() => {
             setPhase("complete");
             setShowShowcase(true);
@@ -103,10 +182,13 @@ export function RevealExperience({ drops, onComplete }: RevealExperienceProps) {
           break;
       }
     },
-    [audio, drop.vessel.rarity, drop.strain.rarity]
+    [audio, haptic, drop.vessel.rarity, drop.strain.rarity]
   );
 
-  const handleCellClick = useCallback(() => audio.playCrack(), [audio]);
+  const handleCellClick = useCallback(() => {
+    audio.playCrack();
+    haptic.vibrateLight();
+  }, [audio, haptic]);
   const handleClose = useCallback(() => {
     audio.stopAll();
     onComplete();
@@ -123,6 +205,18 @@ export function RevealExperience({ drops, onComplete }: RevealExperienceProps) {
   useEffect(() => {
     if (phase === "fight") skipButtonRef.current?.focus();
   }, [phase]);
+
+  // Indicador de loading enquanto texturas carregam
+  if (!texturesReady && !prefersReducedMotion) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          <p className="text-sm text-white/60">Carregando texturas...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Tela de detalhes (após clicar Continuar): vessel + strain com ícones, tags, cores
   if (showDetail) {
@@ -192,14 +286,36 @@ export function RevealExperience({ drops, onComplete }: RevealExperienceProps) {
           onCellClick={handleCellClick}
           focusedCard={focusedCard}
           onFocusCard={handleFocusCard}
+          onProgressUpdate={handleProgressUpdate}
         />
       </RevealCanvas>
 
-      {phase === "fight" && !showShowcase && (
+      {/* Indicador de progresso visual */}
+      <ProgressIndicator
+        clickCount={clickProgress.clickCount}
+        maxClicks={clickProgress.maxClicks}
+        rarity={maxRarity}
+        isVisible={phase === "fight"}
+      />
+
+      {/* Instruções por fase */}
+      {!showShowcase && (
         <div className="absolute left-1/2 top-8 -translate-x-1/2">
-          <p className="animate-pulse text-center text-lg font-medium text-white/80">
-            Clique na caixa para abrir!
-          </p>
+          {phase === "ritual" && (
+            <p className="text-center text-base font-medium text-white/60">
+              Preparando...
+            </p>
+          )}
+          {phase === "fight" && (
+            <p className="animate-pulse text-center text-lg font-medium text-white/80">
+              Toque para liberar energia!
+            </p>
+          )}
+          {phase === "drumroll" && (
+            <p className="animate-pulse text-center text-base font-medium text-amber-400/90">
+              Energia instável...
+            </p>
+          )}
         </div>
       )}
 

@@ -9,7 +9,7 @@
       "base_hp": 2,
       "base_atk": 1,
       "base_mana": 1,
-      "image_url": "/images/creatures/LARI-K4.png",
+      "image_url": "/images/creatures/LARI-K4.webp",
       "series": "season01",
       "model_key": "lari_k4",
       "lore": "Um drone de lixo com mandíbulas insaciáveis. Ele come o resto do seu lanche e o cabo da sua internet."
@@ -21,7 +21,7 @@
       "base_hp": 3,
       "base_atk": 0,
       "base_mana": 1,
-      "image_url": "/images/creatures/SEED-011.png",
+      "image_url": "/images/creatures/SEED-011.webp",
       "series": "season01",
       "model_key": "seed_011",
       "lore": "Dura como pedra. Sobreviveu a prensas hidráulicas e viagens interestelares sem germinar. Inútil, mas resistente."
@@ -33,7 +33,7 @@
       "base_hp": 5,
       "base_atk": 5,
       "base_mana": 2,
-      "image_url": "/images/creatures/PITEIRA-BOT.png",
+      "image_url": "/images/creatures/PITEIRA-BOT.webp",
       "series": "season01",
       "model_key": "piteira_bot",
       "lore": "Robô piteira que filtra a fumaça e a realidade. Segura o beck e a linha do tempo."
@@ -45,7 +45,7 @@
       "base_hp": 1,
       "base_atk": 4,
       "base_mana": 2,
-      "image_url": "/images/creatures/PONTA-BOT.png",
+      "image_url": "/images/creatures/PONTA-BOT.webp",
       "series": "season01",
       "model_key": "ponta_bot_v2",
       "lore": "O finalzinho que queima o dedo e a alma. Pequeno, fedido e concentra todo o alcatrão do universo."
@@ -57,7 +57,7 @@
       "base_hp": 4,
       "base_atk": 1,
       "base_mana": 2,
-      "image_url": "/images/creatures/COCO-FIBER BEAST.png",
+      "image_url": "/images/creatures/COCO-FIBER BEAST.webp",
       "series": "season01",
       "model_key": "coco_fiber_beast",
       "lore": "Um emaranhado de raízes e fibra marrom. Absorve água e dano com a mesma eficiência."
@@ -69,7 +69,7 @@
       "base_hp": 6,
       "base_atk": 6,
       "base_mana": 2,
-      "image_url": "/images/creatures/DICHAVA v2.png",
+      "image_url": "/images/creatures/DICHAVA v2.webp",
       "series": "season01",
       "model_key": "dichava_v2",
       "lore": "Dichava que tritura inimigos e flores na mesma moída. Versão 2 com mais torque."
@@ -81,7 +81,7 @@
       "base_hp": 5,
       "base_atk": 2,
       "base_mana": 3,
-      "image_url": "/images/creatures/TIJOLO_PRIME.png",
+      "image_url": "/images/creatures/TIJOLO_PRIME.webp",
       "series": "season01",
       "model_key": "tijolo_prime",
       "lore": "Um paralelepípedo de matéria orgânica comprimida com amônia espacial. Compacto, denso e bate pesado."
@@ -93,7 +93,7 @@
       "base_hp": 2,
       "base_atk": 5,
       "base_mana": 3,
-      "image_url": "/images/creatures/FINO-SPECTRE.png",
+      "image_url": "/images/creatures/FINO-SPECTRE.webp",
       "series": "season01",
       "model_key": "fino_spectre",
       "lore": "Tão fino que é quase bidimensional. Corta o ar (e o pescoço) sem ser visto. Elegante e letal."
@@ -105,7 +105,7 @@
       "base_hp": 7,
       "base_atk": 7,
       "base_mana": 3,
-      "image_url": "/images/creatures/NEBLINA-PRIME.png",
+      "image_url": "/images/creatures/NEBLINA-PRIME.webp",
       "series": "season01",
       "model_key": "neblina_prime",
       "lore": "Neblina de fumaça e silício. Ataca e defende na mesma nuvem. Prime da linha."
@@ -117,7 +117,7 @@
       "base_hp": 5,
       "base_atk": 4,
       "base_mana": 4,
-      "image_url": "/images/creatures/SEDA-MANCER.png",
+      "image_url": "/images/creatures/SEDA-MANCER.webp",
       "series": "season01",
       "model_key": "seda_mancer",
       "lore": "Ele manipula folhas de celulose transparente para envolver e sufocar os inimigos. O mestre da montagem."
@@ -129,7 +129,7 @@
       "base_hp": 8,
       "base_atk": 8,
       "base_mana": 3,
-      "image_url": "/images/creatures/BONG-MANCER.png",
+      "image_url": "/images/creatures/BONG-MANCER.webp",
       "series": "season01",
       "model_key": "bong_mancer",
       "lore": "Mestre dos bongs. Concentra o dano numa tragada e solta em área. Respeitável."
@@ -141,7 +141,7 @@
       "base_hp": 8,
       "base_atk": 8,
       "base_mana": 6,
-      "image_url": "/images/creatures/MECHA-LION P.R.O.png",
+      "image_url": "/images/creatures/MECHA-LION P.R.O.webp",
       "series": "season01",
       "model_key": "mecha_lion_pro",
       "lore": "Um mecha policial renegado. Ele jurou combater as drogas, mas agora ele as consome para ganhar poder nuclear.",
@@ -154,7 +154,7 @@
       "base_hp": 10,
       "base_atk": 10,
       "base_mana": 4,
-      "image_url": "/images/creatures/PAPA-OG P.R.O.png",
+      "image_url": "/images/creatures/PAPA-OG P.R.O.webp",
       "series": "season01",
       "model_key": "papa_og_pro",
       "lore": "O OG dos OGs. Papou todas as galáxias e voltou pra contar. Profissional.",
@@ -169,7 +169,7 @@
       "family": "NEURO",
       "description": "Tá com a disposição a mil, mas descontrolado. Ataca tudo que se mexe, até o próprio reflexo.",
       "penalty": "-50%",
-      "image_url": "/images/strains/Prensado.zip.png"
+      "image_url": "/images/strains/Prensado.zip.webp"
     },
     {
       "slug": "kush-generico",
@@ -178,7 +178,7 @@
       "family": "SHELL",
       "description": "Posturado, mas meio lerdo. Impõe respeito só pela presença, mas não consegue revidar direito.",
       "penalty": "-50%",
-      "image_url": "/images/strains/Kush%20Gen%C3%A9rico.png"
+      "image_url": "/images/strains/Kush%20Gen%C3%A9rico.webp"
     },
     {
       "slug": "skunkzinho",
@@ -187,7 +187,7 @@
       "family": "PSYCHO",
       "description": "A larica é real, mas fraca. Morde qualquer coisa pra saciar a fome, mas gasta energia demais.",
       "penalty": "+2 Mana",
-      "image_url": "/images/strains/Skunkzinho.png"
+      "image_url": "/images/strains/Skunkzinho.webp"
     },
     {
       "slug": "manga-rosa",
@@ -196,7 +196,7 @@
       "family": "NEURO",
       "description": "Disposição solar do Nordeste. Pilhado e agressivo, mas queima rápido feito pavio curto.",
       "penalty": "-40%",
-      "image_url": "/images/strains/Manga%20Rosa.png"
+      "image_url": "/images/strains/Manga%20Rosa.webp"
     },
     {
       "slug": "pakistani-hash",
@@ -205,7 +205,7 @@
       "family": "SHELL",
       "description": "Postura de respeito importada. Firme e denso, mas lento demais pra reagir.",
       "penalty": "-40%",
-      "image_url": "/images/strains/Pakistani%20Hash.png"
+      "image_url": "/images/strains/Pakistani%20Hash.webp"
     },
     {
       "slug": "gorilla-glue-4",
@@ -214,7 +214,7 @@
       "family": "PSYCHO",
       "description": "Larica grudenta. Morde e não solta, sugando vida do inimigo. Mas cansa fácil.",
       "penalty": "+1 Mana",
-      "image_url": "/images/strains/Gorilla%20Glue%20%234.png"
+      "image_url": "/images/strains/Gorilla%20Glue%20%234.webp"
     },
     {
       "slug": "sour-diesel",
@@ -223,7 +223,7 @@
       "family": "NEURO",
       "description": "Disposição explosiva. Ataca antes do oponente piscar, mas se queima no processo.",
       "penalty": "-30%",
-      "image_url": "/images/strains/Sour%20Diesel.png"
+      "image_url": "/images/strains/Sour%20Diesel.webp"
     },
     {
       "slug": "northern-lights",
@@ -232,7 +232,7 @@
       "family": "SHELL",
       "description": "Posturado e calmo. Ninguém passa por ele sem permissão, mas não tem força pra contra-atacar.",
       "penalty": "-30%",
-      "image_url": "/images/strains/Northern%20Lights.png"
+      "image_url": "/images/strains/Northern%20Lights.webp"
     },
     {
       "slug": "24k-gold",
@@ -241,7 +241,7 @@
       "family": "PSYCHO",
       "description": "Larica dourada. Morde com estilo e drena energia vital, mas gasta recurso pra manter o brilho.",
       "penalty": "+1 Mana",
-      "image_url": "/images/strains/24K%20Gold.png"
+      "image_url": "/images/strains/24K%20Gold.webp"
     },
     {
       "slug": "super-lemon",
@@ -250,7 +250,7 @@
       "family": "NEURO",
       "description": "Disposição cítrica e letal. Pilhado ao extremo, foca só em matar. Rápido, mas frágil.",
       "penalty": "-20%",
-      "image_url": "/images/strains/Super%20Lemon.png"
+      "image_url": "/images/strains/Super%20Lemon.webp"
     },
     {
       "slug": "bubba-kush",
@@ -259,7 +259,7 @@
       "family": "SHELL",
       "description": "Postura de respeito absoluto. Firme como âncora, ninguém passa. Mas não ataca de volta.",
       "penalty": "-20%",
-      "image_url": "/images/strains/Bubba%20Kush.png"
+      "image_url": "/images/strains/Bubba%20Kush.webp"
     },
     {
       "slug": "gelato-33",
@@ -268,7 +268,7 @@
       "family": "PSYCHO",
       "description": "A broca é sinistra. Morde o inimigo pra curar o mestre, mas perde um pouco de vida no processo.",
       "penalty": "-10% HP",
-      "image_url": "/images/strains/Gelato%20%2333.png"
+      "image_url": "/images/strains/Gelato%20%2333.webp"
     },
     {
       "slug": "jack-herer-ai",
@@ -277,7 +277,7 @@
       "family": "NEURO",
       "description": "Disposição filosófica. Pilhado com sabedoria, ataca com precisão cirúrgica. Quase perfeito.",
       "penalty": "-10%",
-      "image_url": "/images/strains/Jack%20Herer.AI.png"
+      "image_url": "/images/strains/Jack%20Herer.AI.webp"
     },
     {
       "slug": "gdp",
@@ -286,7 +286,7 @@
       "family": "SHELL",
       "description": "Postura real roxa. Respeito absoluto, não sente dor nem medo. Quase inabalável.",
       "penalty": "-10%",
-      "image_url": "/images/strains/G.D.P.png"
+      "image_url": "/images/strains/G.D.P.webp"
     },
     {
       "slug": "runtz-exe",
@@ -295,7 +295,7 @@
       "family": "PSYCHO",
       "description": "Larica perfeita. Morde, cura e não para. A fome insaciável sem custo. Puro instinto predador.",
       "penalty": "Sem Penalidade",
-      "image_url": "/images/strains/Runtz.EXE.png"
+      "image_url": "/images/strains/Runtz.EXE.webp"
     }
   ]
 }

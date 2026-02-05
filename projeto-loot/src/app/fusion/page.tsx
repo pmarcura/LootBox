@@ -99,15 +99,15 @@ export default async function FusionPage() {
           <span className="font-medium text-zinc-100">Lab de Fusão</span>
         </nav>
 
-        <header className="space-y-1">
-          <h1
-            className="text-2xl font-bold uppercase tracking-widest text-cyan-100 sm:text-3xl"
-            style={{ fontFamily: "var(--font-orbitron), sans-serif" }}
-          >
-            Câmara de Sessão
+        <header className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.4em] text-zinc-500">
+            Laboratório
+          </p>
+          <h1 className="text-3xl font-semibold text-zinc-50">
+            Fusão de Cartas
           </h1>
           <p className="text-sm text-zinc-400">
-            Escolha um monstro e uma planta na bancada. O bicho vai fazer sessão e virar carta jogável.
+            Combine um vessel com um strain para criar uma carta de batalha.
           </p>
         </header>
 

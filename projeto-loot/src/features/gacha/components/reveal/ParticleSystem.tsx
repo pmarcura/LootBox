@@ -19,10 +19,14 @@ type ParticleSystemProps = {
   rarity: Rarity;
   triggerBurst: number; // increment to trigger new burst
   isShatter: boolean;
+  /** Modo de baixa performance: reduz partículas pela metade */
+  lowEnd?: boolean;
 };
 
 const PARTICLE_COUNT = 80;
+const PARTICLE_COUNT_LOW = 40;
 const SHATTER_PARTICLE_COUNT = 200;
+const SHATTER_PARTICLE_COUNT_LOW = 100;
 const BURST_DURATION = 1500; // ms
 
 function createParticleBurst(count: number, isShatter: boolean): ParticleBurst {
@@ -61,6 +65,7 @@ export function ParticleSystem({
   rarity,
   triggerBurst,
   isShatter,
+  lowEnd = false,
 }: ParticleSystemProps) {
   const config = useMemo(() => RARITY_CONFIG[rarity], [rarity]);
   const [bursts, setBursts] = useState<ParticleBurst[]>([]);
@@ -68,11 +73,13 @@ export function ParticleSystem({
   // Create new burst when triggered
   useEffect(() => {
     if (triggerBurst > 0) {
-      const count = isShatter ? SHATTER_PARTICLE_COUNT : PARTICLE_COUNT;
+      const count = isShatter
+        ? (lowEnd ? SHATTER_PARTICLE_COUNT_LOW : SHATTER_PARTICLE_COUNT)
+        : (lowEnd ? PARTICLE_COUNT_LOW : PARTICLE_COUNT);
       const newBurst = createParticleBurst(count, isShatter);
       setBursts((prev) => [...prev, newBurst]);
     }
-  }, [triggerBurst, isShatter]);
+  }, [triggerBurst, isShatter, lowEnd]);
 
   // Clean up old bursts
   useEffect(() => {

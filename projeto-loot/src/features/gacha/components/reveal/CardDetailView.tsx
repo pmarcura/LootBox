@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Heart, Sword, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Heart, Sword, Sparkles, ArrowRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/Badge";
 import { toSameOriginImageUrl } from "@/lib/catalog-image";
@@ -246,13 +247,14 @@ export function CardDetailView(props: CardDetailViewProps) {
       aria-modal="true"
       aria-label="Detalhes das cartas"
     >
-      <div className="flex-1 overflow-y-auto p-4 pb-24">
-        <div className="mx-auto max-w-2xl">
+      <div className="flex-1 overflow-y-auto p-4 pb-32">
+        <div className="mx-auto max-w-3xl">
           {props.variant === "redeem" ? (
-            <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center sm:gap-8">
+            <div className="flex flex-col gap-6">
               {props.drops.slice(0, 3).map((drop, i) => (
-                <div key={i} className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-6">
-                  <div className="w-full min-w-0 sm:max-w-[280px]">
+                <div key={i} className="grid grid-cols-2 gap-3 sm:gap-6">
+                  {/* Vessel - lado esquerdo */}
+                  <div className="min-w-0">
                     <VesselDetailCard
                       name={drop.vessel.collectibleName}
                       rarity={drop.vessel.rarity}
@@ -262,8 +264,8 @@ export function CardDetailView(props: CardDetailViewProps) {
                       baseMana={drop.vessel.baseMana}
                     />
                   </div>
-                  <div className="hidden items-center text-zinc-500 sm:flex">+</div>
-                  <div className="w-full min-w-0 sm:max-w-[280px]">
+                  {/* Strain - lado direito */}
+                  <div className="min-w-0">
                     <StrainDetailCard
                       name={drop.strain.name}
                       rarity={drop.strain.rarity}
@@ -274,7 +276,7 @@ export function CardDetailView(props: CardDetailViewProps) {
                 </div>
               ))}
             </div>
-  ) : (
+          ) : (
             <div className="mx-auto max-w-md">
               <FusedCardDetail card={props.fusedCard} />
             </div>
@@ -283,6 +285,22 @@ export function CardDetailView(props: CardDetailViewProps) {
       </div>
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 border-t border-zinc-800 bg-zinc-950/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+        {/* CTA para fusão após resgate */}
+        {props.variant === "redeem" && (
+          <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-2">
+            <p className="text-center text-xs text-zinc-400">
+              Vá ao Lab de Fusão para combinar e criar cartas de batalha
+            </p>
+            <Link
+              href="/fusion"
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-violet-400 transition-colors hover:text-violet-300"
+            >
+              Ir para Fusão
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        )}
         <div className="mx-auto flex w-full max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
           {primaryAction}
           {secondaryAction}

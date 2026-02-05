@@ -69,6 +69,6 @@ export type RevealPhase = "idle" | "ritual" | "fight" | "drumroll" | "reveal" | 
 
 export const PHASE_DURATIONS = {
   ritual: 1200, // ms for drop animation
-  drumroll: 1800, // ms for shake/glow buildup
-  reveal: 2500, // ms for shatter + creature appear
+  drumroll: 2200, // ms for shake/glow buildup (aumentado para mais tensão)
+  reveal: 3500, // ms for shatter + creature appear (aumentado para transição mais suave)
 };

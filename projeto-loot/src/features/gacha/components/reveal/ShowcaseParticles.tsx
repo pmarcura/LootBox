@@ -10,21 +10,25 @@ import { createRoundParticleTexture } from "./utils/roundParticleTexture";
 
 type ShowcaseParticlesProps = {
   rarity: Rarity;
+  /** Modo de baixa performance: reduz partículas pela metade */
+  lowEnd?: boolean;
 };
 
 // Partículas apenas no anel externo, longe das cartas
 const INNER_RADIUS = 3.2;
 const OUTER_RADIUS = 5;
 const COUNT = 120;
+const COUNT_LOW = 60;
 const PARTICLE_SIZE = 0.055;
 
-export function ShowcaseParticles({ rarity }: ShowcaseParticlesProps) {
+export function ShowcaseParticles({ rarity, lowEnd = false }: ShowcaseParticlesProps) {
   const config = RARITY_CONFIG[rarity];
   const pointsRef = useRef<THREE.Points>(null);
   const roundTexture = useMemo(() => createRoundParticleTexture(), []);
+  const count = lowEnd ? COUNT_LOW : COUNT;
   const positions = useMemo(() => {
-    const pos = new Float32Array(COUNT * 3);
-    for (let i = 0; i < COUNT; i++) {
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
       const r = INNER_RADIUS + Math.random() * (OUTER_RADIUS - INNER_RADIUS);
       const theta = Math.random() * Math.PI * 2;
       const y = (Math.random() - 0.5) * 2;
@@ -33,7 +37,7 @@ export function ShowcaseParticles({ rarity }: ShowcaseParticlesProps) {
       pos[i * 3 + 2] = Math.sin(theta) * r;
     }
     return pos;
-  }, []);
+  }, [count]);
 
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
